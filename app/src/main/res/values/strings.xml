@@ -1,0 +1,41 @@
+<resources>
+    <string name="app_name">快递路径规划</string>
+    <string name="activity_today">送货路径规划</string>
+    <string name="activity_plan_result">规划结果</string>
+    <string name="activity_compelted_order">完成订单</string>
+    <string name="btn_confirm">确定</string>
+    <string name="btn_plan">开始规划</string>
+    <string name="today_order">今日订单</string>
+    <string name="hint_courierId">请输入您的快递员ID</string>
+    <string name="current_order">正在配送的订单%s</string>
+    <string name="order_id">订单编号：</string>
+    <string name="contacts">联系方式：</string>
+    <string name="address">送货地址：</string>
+    <string name="estimation">预计送达：</string>
+    <string name="failure">配送失败</string>
+    <string name="done">确认送达</string>
+    <string name="waiting">即将配送的订单</string>
+    <string name="uninformed">未短信通知订单</string>
+    <string name="failed">配送失败的订单</string>
+    <string name="detail_order">订单详情</string>
+    <string name="reservation">预约时间：</string>
+    <string name="header_title">title</string>
+    <string name="header_sub_title">sub_title</string>
+    <string name="footer_title">footer title</string>
+    <string name="footer_button_confirm">确定</string>
+    <string name="footer_button_close">关闭</string>
+    <string name="detail_header_title">订单详情</string>
+    <string name="failed_title">配送失败</string>
+    <string name="failed_sub_title">请选择失败原因</string>
+    <string name="vip_rank">VIP等级：%s</string>
+
+    <string name="failed_reason_1">失败原因1</string>
+    <string name="failed_reason_2">失败原因2</string>
+    <string name="failed_reason_3">失败原因3</string>
+    <string name="failed_reason_4">失败原因4</string>
+    <string name="failed_reason_5">失败原因5</string>
+    <string name="failed_reason_other">其他原因</string>
+    <string name="gender">性别</string>
+    <string name="phone">联系电话</string>
+    <string name="arrive_time">送达时间：</string>
+</resources>

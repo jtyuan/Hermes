@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/item_vertical_margin"
+    android:paddingLeft="@dimen/item_horizontal_margin"
+    android:paddingRight="@dimen/item_horizontal_margin"
+    android:paddingTop="@dimen/item_vertical_margin">
+
+    <TextView
+        android:layout_width="32dp"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Small Text"
+        android:id="@+id/tvOrderId"
+        android:textAlignment="textEnd"
+        android:gravity="end"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true" />
+
+    <TextView
+        android:layout_width="64dp"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Small Text"
+        android:id="@+id/tvRecipient"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_toEndOf="@+id/tvOrderId"
+        android:layout_toRightOf="@+id/tvOrderId"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Small Text"
+        android:id="@+id/tvPhoneNum"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_toEndOf="@+id/tvRecipient"
+        android:layout_toRightOf="@+id/tvRecipient"/>
+
+
+</RelativeLayout>
