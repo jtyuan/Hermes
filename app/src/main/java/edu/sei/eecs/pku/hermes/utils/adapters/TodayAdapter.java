@@ -1,6 +1,7 @@
 package edu.sei.eecs.pku.hermes.utils.adapters;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -65,12 +66,20 @@ public class TodayAdapter extends ArrayAdapter<Order> {
         TextView tvPhoneNum;
 
         public void setViews(Order order) {
+            // TODO: 没有姓名和联系方式，临时改成地址
+//            String id = order.getOrderId();
+//            String name = order.getRecipientName();
+//            String phone = order.getRecipientPhone();
+//            this.tvOrderId.setText(id);
+//            this.tvRecipient.setText(name);
+//            this.tvPhoneNum.setText(phone);
+
             String id = order.getOrderId();
-            String name = order.getRecipientName();
-            String phone = order.getRecipientPhone();
+            String address = order.getAddress();
             this.tvOrderId.setText(id);
-            this.tvRecipient.setText(name);
-            this.tvPhoneNum.setText(phone);
+            this.tvRecipient.setText(address.split("\\.")[0]);
+            if (address.split("\\.").length > 1)
+                this.tvPhoneNum.setText(address.split("\\.")[1]);
         }
 
     }

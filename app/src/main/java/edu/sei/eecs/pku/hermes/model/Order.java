@@ -11,14 +11,21 @@ import java.util.Locale;
 public class Order implements Serializable {
 
     private static final long serialVersionUID = -1185929572883854322L;
-    private static final SimpleDateFormat sdf = new SimpleDateFormat("hh:mm", Locale.CHINA);
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.CHINA);
+    public static final int BEGIN = 0;
+    public static final int END = 1;
 
     private String orderId;
+    private String courierId;
+
     private User recipient;
     private String address;
     private long reserveBegin;
     private long reserveEnd;
     private long estimation;
+    private long signNeedTime;
+    private String dispatchDate;
+
     private Failure failure;
 
     private int state;
@@ -30,11 +37,17 @@ public class Order implements Serializable {
     }
 
     public Order (String id, User user, String address, long reserveBegin, long reserveEnd) {
-        this.orderId = id;
-        this.recipient = user;
-        this.address = address;
+        this(id, user, address);
         this.reserveBegin = reserveBegin;
         this.reserveEnd = reserveEnd;
+    }
+
+    public Order (String id, String address) {
+        this(id, new User("0", "姓名", "电话", "邮箱"), address);
+    }
+
+    public Order (String id, String address, long reserveBegin, long reserveEnd) {
+        this(id, new User("0", "姓名", "电话", "邮箱"), address, reserveBegin, reserveEnd);
     }
 
     public String getOrderId() {
@@ -59,6 +72,10 @@ public class Order implements Serializable {
 
     public String getRecipientEmail() {
         return recipient.getUserEmail();
+    }
+
+    public int getRecipientVIPRank() {
+        return recipient.getUserVIPRank();
     }
 
     public long getReserveBeginLong() {
@@ -123,6 +140,10 @@ public class Order implements Serializable {
         recipient.setUserEmail(email);
     }
 
+    public void setRecipientVIPRank(int rank) {
+        recipient.setUserVIPRank(rank);
+    }
+
     public void setReserveBegin(long reserveBegin) {
         this.reserveBegin = reserveBegin;
     }
@@ -145,6 +166,14 @@ public class Order implements Serializable {
 
 
 
+    public String getCourierId() {
+        return courierId;
+    }
+
+    public void setCourierId(String courierId) {
+        this.courierId = courierId;
+    }
+
     public void setFailure(String failedReason) {
         this.failure.failureReason = failedReason;
     }
@@ -155,5 +184,32 @@ public class Order implements Serializable {
 
     public void setState(int state) {
         this.state = state;
+    }
+
+    public long getSignNeedTime() {
+        return signNeedTime;
+    }
+
+    public void setSignNeedTime(long signNeedTime) {
+        this.signNeedTime = signNeedTime;
+    }
+
+
+    public String getDispatchData() {
+        return dispatchDate;
+    }
+
+    public void setDispatchData(String dispatchData) {
+        this.dispatchDate = dispatchData;
+    }
+
+    public static long parseAppointment(String appointment, int part) {
+        int minutes = Integer.valueOf(appointment.split(",")[part]);
+        int hour = minutes / 60;
+        int minute = minutes % 60;
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, hour);
+        calendar.set(Calendar.MINUTE, minute);
+        return calendar.getTimeInMillis();
     }
 }
