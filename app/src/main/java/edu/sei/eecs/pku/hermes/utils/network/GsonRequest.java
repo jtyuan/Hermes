@@ -18,7 +18,9 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
+import edu.sei.eecs.pku.hermes.model.ConflictOrder;
 import edu.sei.eecs.pku.hermes.model.Order;
+import edu.sei.eecs.pku.hermes.model.ReadyOrder;
 
 /**
  * Created by bilibili on 15/11/25.
@@ -61,7 +63,7 @@ public class GsonRequest<T> extends Request<T> {
 
 
         final GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(TodayListGson.class, new TodayListDeserializer());
+        gsonBuilder.registerTypeAdapter(OrderListGson.class, new OrderListDeserializer());
         gsonBuilder.registerTypeAdapter(Order.class, new OrderDeserializer());
         gson = gsonBuilder.create();
     }
@@ -168,7 +170,6 @@ public class GsonRequest<T> extends Request<T> {
         }
 
         public RequestBuilder params(Map<String, String> params) {
-            post();
             this.params = params;
             return this;
         }
@@ -176,7 +177,6 @@ public class GsonRequest<T> extends Request<T> {
         public RequestBuilder addParams(String key, String value) {
             if (params == null) {
                 params = new HashMap<>();
-                post();
             }
             params.put(key, value);
             return this;
@@ -192,6 +192,14 @@ public class GsonRequest<T> extends Request<T> {
         }
 
         public GsonRequest build() {
+
+            if (this.method == Method.GET && params.size() > 0) {
+                this.url += '?';
+                for (Map.Entry<String, String> entry : params.entrySet()) {
+                    this.url += entry.getKey() + '=' + entry.getValue() + '&';
+                }
+                this.url.substring(0, this.url.length()-1);
+            }
             return new GsonRequest(this);
         }
     }

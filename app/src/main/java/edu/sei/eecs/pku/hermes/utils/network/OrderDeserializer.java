@@ -27,15 +27,25 @@ public class OrderDeserializer implements JsonDeserializer<Order> {
         final String appointment = jsonObject.get("appointment").getAsString();
         final long reserveBegin = Order.parseAppointment(appointment, Order.BEGIN);
         final long reserveEnd = Order.parseAppointment(appointment, Order.END);
-        final long signNeedTime = jsonObject.get("sign_need_time").getAsLong();
+        final int signNeedTime = jsonObject.get("sign_need_time").getAsInt();
         final int state = jsonObject.get("status").getAsInt();
         final int rank = jsonObject.get("vip_level").getAsInt();
+
+        final int arriveTime = jsonObject.get("arrive_time").getAsInt();
+        final int waitTime = jsonObject.get("wait_time").getAsInt();
+        final int leaveTime = jsonObject.get("leave_time").getAsInt();
+
+        final String failure = jsonObject.get("failure_reason").getAsString();
 
         final Order order = new Order(orderId, address, reserveBegin, reserveEnd);
         order.setRecipientVIPRank(rank);
         order.setCourierId(courierId);
         order.setSignNeedTime(signNeedTime);
         order.setState(state);
+        order.setArriveTime(arriveTime);
+        order.setWaitTime(waitTime);
+        order.setLeaveTime(leaveTime);
+        order.setFailure(failure);
         return order;
     }
 }

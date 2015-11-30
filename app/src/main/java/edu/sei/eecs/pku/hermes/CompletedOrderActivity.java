@@ -118,7 +118,7 @@ public class CompletedOrderActivity extends AppCompatActivity {
         calendare.set(2015, Calendar.DECEMBER, 16, 9, 45);
         calendar2.set(2015, Calendar.DECEMBER, 16, 10, 0);
 
-        String address = "北京市 海淀区 颐和园路5号 燕园街道 北京大学理科一号楼1616";
+        String address = "北京市.北京大学理科一号楼1616";
 
         for (int i = 0; i < 10; ++i) {
             Order order = new Order(String.valueOf(i), users.get((int)(Math.random()*6)), address,

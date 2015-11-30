@@ -134,7 +134,7 @@
                         android:text="@string/done"
                         android:textColor="@android:color/holo_blue_light"
                         android:id="@+id/buttonDone"
-                        android:layout_below="@+id/tvRes1"
+                        android:layout_below="@+id/tvEwtTitle"
                         android:layout_centerHorizontal="true"
                         android:layout_marginTop="8dp"/>
 
@@ -149,6 +149,27 @@
                         android:layout_alignTop="@+id/tvCurrent"
                         android:layout_alignParentRight="true"
                         android:layout_alignParentEnd="true" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:text="@string/estimated_waiting_time"
+                        android:id="@+id/tvEwtTitle"
+                        android:layout_marginTop="8dp"
+                        android:layout_below="@+id/tvReservationTitle"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentStart="true" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:text="Small Text"
+                        android:id="@+id/tvEwt"
+                        android:layout_alignTop="@+id/tvEwtTitle"
+                        android:layout_toRightOf="@+id/tvEwtTitle"
+                        android:layout_toEndOf="@+id/tvEwtTitle" />
 
 
                 </RelativeLayout>

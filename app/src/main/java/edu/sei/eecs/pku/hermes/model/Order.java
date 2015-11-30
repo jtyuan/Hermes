@@ -8,9 +8,9 @@ import java.util.Locale;
 /**
  * Created by bilibili on 15/11/8.
  */
-public class Order implements Serializable {
+public class Order implements Serializable, Comparable {
 
-    private static final long serialVersionUID = -1185929572883854322L;
+    private static final long serialVersionUID = 3998467362700630317L;
     private static final SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.CHINA);
     public static final int BEGIN = 0;
     public static final int END = 1;
@@ -23,8 +23,11 @@ public class Order implements Serializable {
     private long reserveBegin;
     private long reserveEnd;
     private long estimation;
+
     private long signNeedTime;
-    private String dispatchDate;
+    private long arriveTime;
+    private long waitTime;
+    private long leaveTime;
 
     private Failure failure;
 
@@ -175,7 +178,10 @@ public class Order implements Serializable {
     }
 
     public void setFailure(String failedReason) {
-        this.failure.failureReason = failedReason;
+        if (this.failure == null)
+            this.failure = new Failure(failedReason);
+        else
+            this.failure.failureReason = failedReason;
     }
 
     public int getVIPRank() {
@@ -194,15 +200,6 @@ public class Order implements Serializable {
         this.signNeedTime = signNeedTime;
     }
 
-
-    public String getDispatchData() {
-        return dispatchDate;
-    }
-
-    public void setDispatchData(String dispatchData) {
-        this.dispatchDate = dispatchData;
-    }
-
     public static long parseAppointment(String appointment, int part) {
         int minutes = Integer.valueOf(appointment.split(",")[part]);
         int hour = minutes / 60;
@@ -211,5 +208,41 @@ public class Order implements Serializable {
         calendar.set(Calendar.HOUR_OF_DAY, hour);
         calendar.set(Calendar.MINUTE, minute);
         return calendar.getTimeInMillis();
+    }
+
+    public long getArriveTime() {
+        return arriveTime;
+    }
+
+    public void setArriveTime(int arriveTime) {
+        this.arriveTime = arriveTime;
+
+        int hour = arriveTime / 60;
+        int minute = arriveTime % 60;
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, hour);
+        calendar.set(Calendar.MINUTE, minute);
+        this.estimation = calendar.getTimeInMillis();
+    }
+
+    public long getWaitTime() {
+        return waitTime;
+    }
+
+    public void setWaitTime(int waitTime) {
+        this.waitTime = waitTime;
+    }
+
+    public long getLeaveTime() {
+        return leaveTime;
+    }
+
+    public void setLeaveTime(int leaveTime) {
+        this.leaveTime = leaveTime;
+    }
+
+    @Override
+    public int compareTo(Object another) {
+        return 0;
     }
 }

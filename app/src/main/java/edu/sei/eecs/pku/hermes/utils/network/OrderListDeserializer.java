@@ -1,6 +1,5 @@
 package edu.sei.eecs.pku.hermes.utils.network;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
@@ -14,10 +13,10 @@ import edu.sei.eecs.pku.hermes.model.Order;
 /**
  * Created by bilibili on 15/11/29.
  */
-public class TodayListDeserializer implements JsonDeserializer<TodayListGson> {
+public class OrderListDeserializer implements JsonDeserializer<OrderListGson> {
 
     @Override
-    public TodayListGson deserialize(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context)
+    public OrderListGson deserialize(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context)
             throws JsonParseException {
         final JsonObject jsonObject = json.getAsJsonObject();
 
@@ -25,7 +24,7 @@ public class TodayListDeserializer implements JsonDeserializer<TodayListGson> {
 
         final Order[] orders = context.deserialize(jsonObject.get("orders"), Order[].class);
 
-        final TodayListGson list = new TodayListGson();
+        final OrderListGson list = new OrderListGson();
         list.setStatus(status);
         list.setOrders(orders);
         return list;

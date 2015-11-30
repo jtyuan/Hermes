@@ -7,11 +7,11 @@
     <string name="btn_plan">开始规划</string>
     <string name="today_order">今日订单</string>
     <string name="hint_courierId">请输入您的快递员ID</string>
-    <string name="current_order">正在配送的订单%s</string>
+    <string name="current_order">正在配送的订单 (VIP %s)</string>
     <string name="order_id">订单编号：</string>
     <string name="contacts">联系方式：</string>
     <string name="address">送货地址：</string>
-    <string name="estimation">预计送达：</string>
+    <string name="estimation">预计到达：</string>
     <string name="failure">配送失败</string>
     <string name="done">确认送达</string>
     <string name="waiting">即将配送的订单</string>
@@ -29,13 +29,14 @@
     <string name="failed_sub_title">请选择失败原因</string>
     <string name="vip_rank">VIP等级：%s</string>
 
-    <string name="failed_reason_1">失败原因1</string>
-    <string name="failed_reason_2">失败原因2</string>
-    <string name="failed_reason_3">失败原因3</string>
+    <string name="failed_reason_1">收货人临时有事</string>
+    <string name="failed_reason_2">未能及时送达</string>
+    <string name="failed_reason_3">联系不上收货人</string>
     <string name="failed_reason_4">失败原因4</string>
     <string name="failed_reason_5">失败原因5</string>
     <string name="failed_reason_other">其他原因</string>
     <string name="gender">性别</string>
     <string name="phone">联系电话</string>
     <string name="arrive_time">送达时间：</string>
+    <string name="estimated_waiting_time">预计等待时间：</string>
 </resources>

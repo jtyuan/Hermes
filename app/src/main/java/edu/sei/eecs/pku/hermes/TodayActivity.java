@@ -12,7 +12,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -38,7 +37,7 @@ import edu.sei.eecs.pku.hermes.model.User;
 import edu.sei.eecs.pku.hermes.utils.adapters.TodayAdapter;
 import edu.sei.eecs.pku.hermes.utils.network.GsonRequest;
 import edu.sei.eecs.pku.hermes.utils.network.HttpClientRequest;
-import edu.sei.eecs.pku.hermes.utils.network.TodayListGson;
+import edu.sei.eecs.pku.hermes.utils.network.OrderListGson;
 
 @EActivity(R.layout.activity_today)
 public class TodayActivity extends AppCompatActivity {
@@ -68,16 +67,19 @@ public class TodayActivity extends AppCompatActivity {
                 + "&dispatch_date=" + sdf.format(Calendar.getInstance().getTime()));
 
         GsonRequest gsonRequest = new GsonRequest.RequestBuilder()
-                .url(Constants.SCHEDULE_URL
-                        + "getOrders?courierID=" + inputCourierId.getText().toString().trim()
-                        + "&dispatch_date=" + "20151111")//TODO: should be sdf.format(Calendar.getInstance().getTime()))
-                .clazz(TodayListGson.class)
+//                .url(Constants.SCHEDULE_URL
+//                        + "getOrders?courierID=" + inputCourierId.getText().toString().trim()
+//                        + "&dispatch_date=" + "20151111")//TODO: should be sdf.format(Calendar.getInstance().getTime()))
+                .url(Constants.SCHEDULE_URL + "getOrders")
+                .addParams("courierID", inputCourierId.getText().toString().trim())
+                .addParams("dispatch_date", "20151111")
+                .clazz(OrderListGson.class)
                 .successListener(new Response.Listener() {
                     @Override
                     public void onResponse(Object response) {
                         generateData(); // TODO: remove this
                         orders.clear();
-                        orders.addAll(Arrays.asList(((TodayListGson)response).getOrders()));
+                        orders.addAll(Arrays.asList(((OrderListGson)response).getOrders()));
 
                         // remove dispatching center from order list
                         final ArrayList<Order> removeList = new ArrayList<Order>();
@@ -104,11 +106,8 @@ public class TodayActivity extends AppCompatActivity {
 
     @Click
     void buttonPlan() {
-        Intent intent = new Intent(TodayActivity.this, PlanResultActivity_.class);
-        Bundle bundle = new Bundle();
-        bundle.putSerializable("orders", orders);
-        intent.putExtras(bundle);
-        startActivity(intent);
+        PlanResultActivity_.intent(TodayActivity.this).start();
+        finish();
     }
 
     @ItemClick

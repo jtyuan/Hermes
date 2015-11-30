@@ -69,7 +69,8 @@ public class FailureAdapter extends ArrayAdapter<Order> {
             String name = order.getRecipientName();
             String failure = order.getFailure();
             this.tvOrderId.setText(id);
-            this.tvRecipient.setText(name);
+//            this.tvRecipient.setText(name); // TODO: 临时
+            this.tvRecipient.setText(order.getAddress().split("\\.")[0]);
             this.tvFailure.setText(failure);
         }
 

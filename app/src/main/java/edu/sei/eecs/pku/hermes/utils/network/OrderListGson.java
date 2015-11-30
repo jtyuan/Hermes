@@ -7,7 +7,7 @@ import edu.sei.eecs.pku.hermes.model.Order;
 /**
  * Created by bilibili on 15/11/29.
  */
-public class TodayListGson {
+public class OrderListGson {
     private String status;
     private Order [] orders;
 
