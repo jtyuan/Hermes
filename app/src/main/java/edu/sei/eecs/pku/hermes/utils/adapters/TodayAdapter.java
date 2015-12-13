@@ -44,6 +44,7 @@ public class TodayAdapter extends ArrayAdapter<Order> {
             holder.tvOrderId = (TextView) convertView.findViewById(R.id.tvOrderId);
             holder.tvPhoneNum = (TextView) convertView.findViewById(R.id.tvPhoneNum);
             holder.tvRecipient = (TextView) convertView.findViewById(R.id.tvRecipient);
+            holder.tvAddress = (TextView) convertView.findViewById(R.id.tvAddress);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
@@ -64,22 +65,18 @@ public class TodayAdapter extends ArrayAdapter<Order> {
         TextView tvOrderId;
         TextView tvRecipient;
         TextView tvPhoneNum;
+        TextView tvAddress;
 
         public void setViews(Order order) {
-            // TODO: 没有姓名和联系方式，临时改成地址
-//            String id = order.getOrderId();
-//            String name = order.getRecipientName();
-//            String phone = order.getRecipientPhone();
-//            this.tvOrderId.setText(id);
-//            this.tvRecipient.setText(name);
-//            this.tvPhoneNum.setText(phone);
-
             String id = order.getOrderId();
+            String name = order.getRecipientName();
+            String phone = order.getRecipientPhone();
             String address = order.getAddress();
             this.tvOrderId.setText(id);
-            this.tvRecipient.setText(address.split("\\.")[0]);
-            if (address.split("\\.").length > 1)
-                this.tvPhoneNum.setText(address.split("\\.")[1]);
+            this.tvRecipient.setText(name);
+            this.tvPhoneNum.setText(phone);
+            this.tvAddress.setText(address);
+
         }
 
     }

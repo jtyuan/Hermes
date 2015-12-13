@@ -7,17 +7,18 @@ def AAVersion = '3.3.2'
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
+    apt "org.androidannotations:androidannotations:$AAVersion"
+    compile "org.androidannotations:androidannotations-api:$AAVersion"
+    compile project(':volley')
     compile 'com.android.support:appcompat-v7:23.1.1'
     compile 'com.android.support:recyclerview-v7:23.1.1'
     compile 'com.android.support:cardview-v7:23.1.1'
     compile 'com.orhanobut:dialogplus:1.10@aar'
-    apt "org.androidannotations:androidannotations:$AAVersion"
-    compile "org.androidannotations:androidannotations-api:$AAVersion"
     compile 'com.google.code.gson:gson:2.4'
     compile 'com.squareup.okhttp:okhttp:2.6.0'
     compile 'com.squareup.okhttp:okhttp-urlconnection:2.6.0'
     compile 'com.squareup.okio:okio:1.6.0'
-    compile project(':volley')
+    compile 'com.android.support:design:23.1.1'
 }
 
 def getManifestByVariant(variant) {
@@ -27,7 +28,6 @@ def getManifestByVariant(variant) {
     }
     return variant.outputs[0]?.processResources?.manifestFile
 }
-
 
 
 apt {
@@ -60,6 +60,9 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+    sourceSets.main {
+        jniLibs.srcDirs = ['libs']  // <-- Set your folder here!
     }
     useLibrary 'org.apache.http.legacy'
 }

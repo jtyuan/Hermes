@@ -2,12 +2,14 @@ package edu.sei.eecs.pku.hermes;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
@@ -17,6 +19,7 @@ import android.widget.Toast;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
 import com.orhanobut.dialogplus.DialogPlus;
 import com.orhanobut.dialogplus.Holder;
 import com.orhanobut.dialogplus.OnClickListener;
@@ -45,6 +48,7 @@ import edu.sei.eecs.pku.hermes.utils.network.GsonRequest;
 import edu.sei.eecs.pku.hermes.utils.network.HttpClientRequest;
 import edu.sei.eecs.pku.hermes.utils.network.OrderListDeserializer;
 import edu.sei.eecs.pku.hermes.utils.network.OrderListGson;
+import edu.sei.eecs.pku.hermes.utils.network.ResultGson;
 import edu.sei.eecs.pku.hermes.utils.network.ScheduledListGson;
 
 @EActivity(R.layout.activity_plan_result)
@@ -102,13 +106,43 @@ public class PlanResultActivity extends AppCompatActivity {
 
     @Click
     void buttonDone() {
-        readyOrders.remove(0);
-        refreshList();
+
+        GsonRequest gsonRequest = new GsonRequest.RequestBuilder()
+                .post()
+                .url(Constants.SCHEDULE_URL + "postFeedback")
+                .addParams("orderID", readyOrders.get(0).getOrderId()) // TODO: courierID
+                .addParams("real_time", String.valueOf(getCurrentTimeInSecond()))
+                .addParams("type", "0")
+                .addParams("message", "success")
+                .clazz(ResultGson.class)
+                .successListener(new Response.Listener() {
+                    @Override
+                    public void onResponse(Object response) {
+//                            generateData(); // TODO: remove this
+                        if (((ResultGson)response).status.equals("ok")) {
+                            Log.d("response", ((ResultGson)response).status);
+                            completedOrders.add(readyOrders.get(0));
+                            readyOrders.remove(0);
+                            refreshList();
+                        }
+                    }
+                })
+                .errorListener(new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(PlanResultActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                })
+                .build();
+        queue.add(gsonRequest);
+
+
+
     }
 
     @Click
     void buttonFailed() {
-        List<String> list = new ArrayList<>();
+        final List<String> list = new ArrayList<>();
 
         list.add(PlanResultActivity.this.getString(R.string.failed_reason_1));
         list.add(PlanResultActivity.this.getString(R.string.failed_reason_2));
@@ -124,10 +158,13 @@ public class PlanResultActivity extends AppCompatActivity {
         View headerView = View.inflate(PlanResultActivity.this, R.layout.detail_dialog_header, null);
         View footerView = View.inflate(PlanResultActivity.this, R.layout.detail_dialog_footer_two_buttons, null);
 
+
+
         ((TextView)headerView.findViewById(R.id.tvHeaderTitle)).setText(R.string.failed_title);
         ((TextView)headerView.findViewById(R.id.tvHeaderSub)).setText(R.string.failed_sub_title);
         (footerView.findViewById(R.id.tvFooterTitle)).setVisibility(View.INVISIBLE);
 
+        final TextView tvFailure = new TextView(this);
         DialogPlus dialog = DialogPlus.newDialog(PlanResultActivity.this)
                 .setContentHolder(holder)
                 .setHeader(headerView)
@@ -139,6 +176,37 @@ public class PlanResultActivity extends AppCompatActivity {
                     public void onClick(DialogPlus dialog, View view) {
                         switch (view.getId()) {
                             case R.id.footer_confirm_button:
+
+                                GsonRequest gsonRequest = new GsonRequest.RequestBuilder()
+                                        .post()
+                                        .url(Constants.SCHEDULE_URL + "postFeedback")
+                                        .addParams("orderID", readyOrders.get(0).getOrderId()) // TODO: courierID
+                                        .addParams("real_time", String.valueOf(getCurrentTimeInSecond()))
+                                        .addParams("type", "1")
+                                        .addParams("message", tvFailure.getText().toString())
+                                        .clazz(ResultGson.class)
+                                        .successListener(new Response.Listener() {
+                                            @Override
+                                            public void onResponse(Object response) {
+                                                if (((ResultGson) response).status.equals("ok")) {
+                                                    readyOrders.get(0).setFailure(tvFailure.getText().toString());
+                                                    failedOrders.add(readyOrders.get(0));
+                                                    readyOrders.remove(0);
+                                                    refreshList();
+                                                }
+                                            }
+                                        })
+                                        .errorListener(new Response.ErrorListener() {
+                                            @Override
+                                            public void onErrorResponse(VolleyError error) {
+                                                Toast.makeText(PlanResultActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
+                                            }
+                                        })
+                                        .build();
+                                queue.add(gsonRequest);
+
+
+
                                 dialog.dismiss();
                                 break;
                             case R.id.footer_close_button:
@@ -149,7 +217,19 @@ public class PlanResultActivity extends AppCompatActivity {
                 })
                 .create();
 
-        ((Spinner)dialog.getHolderView().findViewById(R.id.spinner)).setAdapter(adapter);
+        Spinner spinner = (Spinner) dialog.getHolderView().findViewById(R.id.spinner);
+        spinner.setAdapter(adapter);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                tvFailure.setText(list.get(position));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
         dialog.show();
     }
@@ -317,6 +397,7 @@ public class PlanResultActivity extends AppCompatActivity {
         readyOrders = new ArrayList<>();
         uninformedOrders = new ArrayList<>();
         failedOrders = new ArrayList<>();
+        completedOrders = new ArrayList<>();
 
         users = new ArrayList<>();
 
@@ -328,8 +409,8 @@ public class PlanResultActivity extends AppCompatActivity {
             GsonRequest gsonRequest = new GsonRequest.RequestBuilder()
                     .post()
                     .url(Constants.SCHEDULE_URL + "runSchedule")
-                    .addParams("courierID", "jty")
-                    .addParams("dispatch_date", "20151111")
+                    .addParams("courierID", "25430") // TODO: courierID
+                    .addParams("dispatch_date", "20151123")
                     .clazz(OrderListGson.class)
                     .successListener(new Response.Listener() {
                         @Override
@@ -496,5 +577,12 @@ public class PlanResultActivity extends AppCompatActivity {
             return false;
         }
 
+    }
+
+    public static int getCurrentTimeInSecond() {
+        Calendar calendar = Calendar.getInstance();
+        return (calendar.get(Calendar.HOUR_OF_DAY) * 60
+                + calendar.get(Calendar.MINUTE)) *60
+                +calendar.get(Calendar.SECOND);
     }
 }

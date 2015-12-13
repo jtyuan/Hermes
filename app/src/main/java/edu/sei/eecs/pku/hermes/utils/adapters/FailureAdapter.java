@@ -41,8 +41,9 @@ public class FailureAdapter extends ArrayAdapter<Order> {
             convertView = inflater.inflate(resource, null);
             holder = new ViewHolder();
             holder.tvOrderId = (TextView) convertView.findViewById(R.id.tvOrderId);
-            holder.tvFailure = (TextView) convertView.findViewById(R.id.tvPhoneNum);
+            holder.tvPhoneNum = (TextView) convertView.findViewById(R.id.tvPhoneNum);
             holder.tvRecipient = (TextView) convertView.findViewById(R.id.tvRecipient);
+            holder.tvFailure = (TextView) convertView.findViewById(R.id.tvAddress);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
@@ -63,14 +64,16 @@ public class FailureAdapter extends ArrayAdapter<Order> {
         TextView tvOrderId;
         TextView tvRecipient;
         TextView tvFailure;
+        TextView tvPhoneNum;
 
         public void setViews(Order order) {
             String id = order.getOrderId();
             String name = order.getRecipientName();
+            String phone = order.getRecipientPhone();
             String failure = order.getFailure();
             this.tvOrderId.setText(id);
-//            this.tvRecipient.setText(name); // TODO: 临时
-            this.tvRecipient.setText(order.getAddress().split("\\.")[0]);
+            this.tvRecipient.setText(name);
+            this.tvPhoneNum.setText(phone);
             this.tvFailure.setText(failure);
         }
 

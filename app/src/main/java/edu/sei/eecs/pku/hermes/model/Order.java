@@ -201,12 +201,14 @@ public class Order implements Serializable, Comparable {
     }
 
     public static long parseAppointment(String appointment, int part) {
-        int minutes = Integer.valueOf(appointment.split(",")[part]);
-        int hour = minutes / 60;
-        int minute = minutes % 60;
+        int seconds = Integer.valueOf(appointment.split(",")[part]);
+        int hour = seconds / 3600;
+        int minute = (seconds % 3600) / 60;
+        int second = seconds % 60;
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.HOUR_OF_DAY, hour);
         calendar.set(Calendar.MINUTE, minute);
+        calendar.set(Calendar.SECOND, second);
         return calendar.getTimeInMillis();
     }
 
@@ -217,11 +219,13 @@ public class Order implements Serializable, Comparable {
     public void setArriveTime(int arriveTime) {
         this.arriveTime = arriveTime;
 
-        int hour = arriveTime / 60;
-        int minute = arriveTime % 60;
+        int hour = arriveTime / 3600;
+        int minute = (arriveTime % 3600) / 60;
+        int second = arriveTime % 60;
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.HOUR_OF_DAY, hour);
         calendar.set(Calendar.MINUTE, minute);
+        calendar.set(Calendar.SECOND, second);
         this.estimation = calendar.getTimeInMillis();
     }
 

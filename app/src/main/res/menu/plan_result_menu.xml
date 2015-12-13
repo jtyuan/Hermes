@@ -3,6 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item android:id="@+id/completed"
-        android:title="@string/activity_compelted_order"
+        android:title="@string/activity_completed_order"
         app:showAsAction="ifRoom"/>
 </menu>

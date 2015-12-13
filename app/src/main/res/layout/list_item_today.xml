@@ -8,40 +8,61 @@
     android:paddingTop="@dimen/item_vertical_margin">
 
     <TextView
-        android:layout_width="32dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:text="Small Text"
         android:id="@+id/tvOrderId"
         android:textAlignment="textEnd"
         android:gravity="end"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentLeft="true" />
-
-    <TextView
-        android:layout_width="64dp"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="Small Text"
-        android:id="@+id/tvRecipient"
-        android:layout_alignParentTop="true"
-        android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
-        android:layout_toEndOf="@+id/tvOrderId"
-        android:layout_toRightOf="@+id/tvOrderId"/>
+        android:layout_alignBaseline="@+id/textView3"
+        android:layout_alignBottom="@+id/textView3"
+        android:layout_toRightOf="@+id/textView3"
+        android:layout_toEndOf="@+id/textView3" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="Small Text"
-        android:id="@+id/tvPhoneNum"
+        android:text="@string/orderIDTitle"
+        android:id="@+id/textView3"
         android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Medium Text"
+        android:id="@+id/tvRecipient"
+        android:layout_below="@+id/tvOrderId"
+
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Medium Text"
+        android:id="@+id/tvPhoneNum"
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
-        android:layout_toEndOf="@+id/tvRecipient"
-        android:layout_toRightOf="@+id/tvRecipient"/>
+
+        android:layout_alignTop="@+id/tvRecipient"
+        android:layout_toRightOf="@+id/tvRecipient"
+        android:layout_toEndOf="@+id/tvRecipient" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Medium Text"
+        android:id="@+id/tvAddress"
+        android:layout_below="@+id/tvRecipient"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
 
 </RelativeLayout>

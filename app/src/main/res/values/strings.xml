@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">快递路径规划</string>
-    <string name="activity_today">送货路径规划</string>
+    <string name="activity_today">今日订单</string>
     <string name="activity_plan_result">规划结果</string>
-    <string name="activity_compelted_order">完成订单</string>
+    <string name="activity_completed_order">完成订单</string>
     <string name="btn_confirm">确定</string>
     <string name="btn_plan">开始规划</string>
     <string name="today_order">今日订单</string>
@@ -39,4 +39,7 @@
     <string name="phone">联系电话</string>
     <string name="arrive_time">送达时间：</string>
     <string name="estimated_waiting_time">预计等待时间：</string>
+    <string name="orderIDTitle">订单号：</string>
+    <string name="addressTitle">目标地址：</string>
+    <string name="title_activity_main">快递路径规划</string>
 </resources>

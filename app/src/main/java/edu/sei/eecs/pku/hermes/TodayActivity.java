@@ -72,7 +72,7 @@ public class TodayActivity extends AppCompatActivity {
 //                        + "&dispatch_date=" + "20151111")//TODO: should be sdf.format(Calendar.getInstance().getTime()))
                 .url(Constants.SCHEDULE_URL + "getOrders")
                 .addParams("courierID", inputCourierId.getText().toString().trim())
-                .addParams("dispatch_date", "20151111")
+                .addParams("dispatch_date", "20151123") // TODO: to real date
                 .clazz(OrderListGson.class)
                 .successListener(new Response.Listener() {
                     @Override
