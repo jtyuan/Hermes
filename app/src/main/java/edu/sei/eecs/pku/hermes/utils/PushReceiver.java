@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.google.gson.Gson;
+
 import org.androidannotations.annotations.EReceiver;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -14,6 +16,7 @@ import java.util.Iterator;
 
 import cn.jpush.android.api.JPushInterface;
 import edu.sei.eecs.pku.hermes.MainActivity;
+import edu.sei.eecs.pku.hermes.PlanResultActivity;
 import edu.sei.eecs.pku.hermes.PlanResultActivity_;
 
 /**
@@ -22,6 +25,7 @@ import edu.sei.eecs.pku.hermes.PlanResultActivity_;
 @EReceiver
 public class PushReceiver extends BroadcastReceiver {
     private static final String TAG = "JPush";
+    Gson gson = new Gson();
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -35,7 +39,7 @@ public class PushReceiver extends BroadcastReceiver {
 
         } else if (JPushInterface.ACTION_MESSAGE_RECEIVED.equals(intent.getAction())) {
             Log.d(TAG, "[MyReceiver] 接收到推送下来的自定义消息: " + bundle.getString(JPushInterface.EXTRA_MESSAGE));
-//            processCustomMessage(context, bundle);
+            processCustomMessage(context, bundle);
 
         } else if (JPushInterface.ACTION_NOTIFICATION_RECEIVED.equals(intent.getAction())) {
             Log.d(TAG, "[MyReceiver] 接收到推送下来的通知");
@@ -45,12 +49,16 @@ public class PushReceiver extends BroadcastReceiver {
         } else if (JPushInterface.ACTION_NOTIFICATION_OPENED.equals(intent.getAction())) {
             Log.d(TAG, "[MyReceiver] 用户点击打开了通知");
 
-            //打开自定义的Activity
-            Intent i = new Intent(context, PlanResultActivity_.class);
-            i.putExtras(bundle);
-            //i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP );
-            context.startActivity(i);
+            PushExtra extra = gson.fromJson(bundle.getString(JPushInterface.EXTRA_EXTRA), PushExtra.class);
+
+            switch (extra.code) {
+                case PushExtra.CODE_REAPPOINT:
+                    PlanResultActivity_
+                            .intent(context)
+                            .flags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                            .start();
+                    break;
+            }
 
         } else if (JPushInterface.ACTION_RICHPUSH_CALLBACK.equals(intent.getAction())) {
             Log.d(TAG, "[MyReceiver] 用户收到到RICH PUSH CALLBACK: " + bundle.getString(JPushInterface.EXTRA_EXTRA));
@@ -96,6 +104,33 @@ public class PushReceiver extends BroadcastReceiver {
             }
         }
         return sb.toString();
+    }
+
+    //send msg to MainActivity
+    private void processCustomMessage(Context context, Bundle bundle) {
+        if (PlanResultActivity.isForeground) {
+            String message = bundle.getString(JPushInterface.EXTRA_MESSAGE);
+            String extras = bundle.getString(JPushInterface.EXTRA_EXTRA);
+            Intent msgIntent = new Intent(PlanResultActivity.MESSAGE_RECEIVED_ACTION);
+            msgIntent.putExtra(PlanResultActivity.KEY_MESSAGE, message);
+            if (!PushUtil.isEmpty(extras)) {
+                try {
+                    JSONObject extraJson = new JSONObject(extras);
+                    if ( extraJson.length() > 0) {
+                        msgIntent.putExtra(PlanResultActivity.KEY_EXTRAS, extras);
+                    }
+                } catch (JSONException e) {
+                    Log.d(TAG, e.getMessage());
+                }
+
+            }
+            context.sendBroadcast(msgIntent);
+        }
+    }
+
+    private class PushExtra {
+        public final static int CODE_REAPPOINT = 1;
+        public int code;
     }
 
 }

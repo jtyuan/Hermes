@@ -48,6 +48,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Properties;
 
+import cn.jpush.android.api.JPushInterface;
 import edu.sei.eecs.pku.hermes.configs.Constants;
 import edu.sei.eecs.pku.hermes.model.Failure;
 import edu.sei.eecs.pku.hermes.model.Order;
@@ -639,7 +640,9 @@ public class PlanResultActivity extends AppCompatActivity {
 
     private MessageReceiver mMessageReceiver;
     public static final String MESSAGE_RECEIVED_ACTION = "edu.sei.eecs.pku.hermes.MESSAGE_RECEIVED_ACTION";
-
+    public static final String KEY_TITLE = "title";
+    public static final String KEY_MESSAGE = "message";
+    public static final String KEY_EXTRAS = "extras";
     public void registerMessageReceiver() {
         mMessageReceiver = new MessageReceiver();
         IntentFilter filter = new IntentFilter();
