@@ -1,5 +1,10 @@
 package edu.sei.eecs.pku.hermes;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -9,9 +14,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,6 +29,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.lsjwzh.widget.materialloadingprogressbar.CircleProgressBar;
 import com.orhanobut.dialogplus.DialogPlus;
 import com.orhanobut.dialogplus.Holder;
 import com.orhanobut.dialogplus.OnClickListener;
@@ -36,6 +46,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Properties;
 
 import edu.sei.eecs.pku.hermes.configs.Constants;
 import edu.sei.eecs.pku.hermes.model.Failure;
@@ -53,6 +64,7 @@ import edu.sei.eecs.pku.hermes.utils.network.ScheduledListGson;
 
 @EActivity(R.layout.activity_plan_result)
 public class PlanResultActivity extends AppCompatActivity {
+    public static boolean isForeground = false;
 
     RequestQueue queue;
 
@@ -103,6 +115,15 @@ public class PlanResultActivity extends AppCompatActivity {
 
     @ViewById(R.id.tvEwt)
     TextView tvEwt;
+
+    @ViewById(R.id.llHeaderProgress)
+    LinearLayout llHeaderProgress;
+
+    @ViewById(R.id.progressBar)
+    CircleProgressBar progressBar;
+
+    @ViewById(R.id.scrollView)
+    ScrollView scrollView;
 
     @Click
     void buttonDone() {
@@ -389,6 +410,8 @@ public class PlanResultActivity extends AppCompatActivity {
         }
     }
 
+
+
     // layout injection must allow time for view binding
     @AfterViews
     void init() {
@@ -404,7 +427,11 @@ public class PlanResultActivity extends AppCompatActivity {
         // Get a Request Queue
         queue = HttpClientRequest.getInstance(this.getApplicationContext()).getRequestQueue();
 
+        registerMessageReceiver();
+
         if (waitingList != null && uninformedList != null && failedList != null) {
+
+            progressBar.setColorSchemeResources(R.color.colorPrimary);
 
             GsonRequest gsonRequest = new GsonRequest.RequestBuilder()
                     .post()
@@ -416,6 +443,8 @@ public class PlanResultActivity extends AppCompatActivity {
                         @Override
                         public void onResponse(Object response) {
 //                            generateData(); // TODO: remove this
+                            llHeaderProgress.setVisibility(View.GONE);
+                            scrollView.setVisibility(View.VISIBLE);
                             orders.clear();
                             orders.addAll(Arrays.asList(((OrderListGson) response).getOrders()));
                             orders.remove(0);
@@ -584,5 +613,45 @@ public class PlanResultActivity extends AppCompatActivity {
         return (calendar.get(Calendar.HOUR_OF_DAY) * 60
                 + calendar.get(Calendar.MINUTE)) *60
                 +calendar.get(Calendar.SECOND);
+    }
+
+
+
+    @Override
+    protected void onResume() {
+        isForeground = true;
+        super.onResume();
+    }
+
+
+    @Override
+    protected void onPause() {
+        isForeground = false;
+        super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        unregisterReceiver(mMessageReceiver);
+        super.onDestroy();
+    }
+
+
+    private MessageReceiver mMessageReceiver;
+    public static final String MESSAGE_RECEIVED_ACTION = "edu.sei.eecs.pku.hermes.MESSAGE_RECEIVED_ACTION";
+
+    public void registerMessageReceiver() {
+        mMessageReceiver = new MessageReceiver();
+        IntentFilter filter = new IntentFilter();
+        filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+        filter.addAction(MESSAGE_RECEIVED_ACTION);
+        registerReceiver(mMessageReceiver, filter);
+    }
+
+    public class MessageReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            PlanResultActivity.this.finish();
+        }
     }
 }

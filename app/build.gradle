@@ -19,6 +19,7 @@ dependencies {
     compile 'com.squareup.okhttp:okhttp-urlconnection:2.6.0'
     compile 'com.squareup.okio:okio:1.6.0'
     compile 'com.android.support:design:23.1.1'
+    compile 'com.lsjwzh:materialloadingprogressbar:0.5.8-RELEASE'
 }
 
 def getManifestByVariant(variant) {
