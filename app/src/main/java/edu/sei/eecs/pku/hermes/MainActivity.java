@@ -43,8 +43,8 @@ public class MainActivity extends AppCompatActivity {
         PushService_.intent(getApplication()).start();
 
         // TODO: change to login activity
-//        TodayActivity_.intent(MainActivity.this).start();
-        PlanResultActivity_.intent(MainActivity.this).start();
+        TodayActivity_.intent(MainActivity.this).start();
+//        PlanResultActivity_.intent(MainActivity.this).start();
         finish();
     }
 

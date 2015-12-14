@@ -436,7 +436,7 @@ public class PlanResultActivity extends AppCompatActivity {
 
             GsonRequest gsonRequest = new GsonRequest.RequestBuilder()
                     .post()
-                    .url(Constants.SCHEDULE_URL + "runSchedule")
+                    .url(Constants.SCHEDULE_URL + "getSchedule")
                     .addParams("courierID", "25430") // TODO: courierID
                     .addParams("dispatch_date", "20151123")
                     .clazz(OrderListGson.class)
