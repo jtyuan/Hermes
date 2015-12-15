@@ -435,7 +435,7 @@ public class PlanResultActivity extends AppCompatActivity {
             progressBar.setColorSchemeResources(R.color.colorPrimary);
 
             GsonRequest gsonRequest = new GsonRequest.RequestBuilder()
-                    .post()
+//                    .post()
                     .url(Constants.SCHEDULE_URL + "getSchedule")
                     .addParams("courierID", "25430") // TODO: courierID
                     .addParams("dispatch_date", "20151123")
