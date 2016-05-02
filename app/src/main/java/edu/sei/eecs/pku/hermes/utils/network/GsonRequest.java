@@ -12,15 +12,11 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 
-import org.json.JSONObject;
-
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
-import edu.sei.eecs.pku.hermes.model.ConflictOrder;
 import edu.sei.eecs.pku.hermes.model.Order;
-import edu.sei.eecs.pku.hermes.model.ReadyOrder;
 
 /**
  * Created by bilibili on 15/11/25.
@@ -194,12 +190,14 @@ public class GsonRequest<T> extends Request<T> {
         public GsonRequest build() {
 
             if (this.method == Method.GET && params.size() > 0) {
-                this.url += '?';
+//                this.url += '?';
                 for (Map.Entry<String, String> entry : params.entrySet()) {
-                    this.url += entry.getKey() + '=' + entry.getValue() + '&';
+//                    this.url += entry.getKey() + '=' + entry.getValue() + '&';
+                    this.url += '/' + entry.getKey() + '/' + entry.getValue();
                 }
-                this.url.substring(0, this.url.length()-1);
+//                this.url.substring(0, this.url.length()-1);
             }
+            Log.d("GsonRequest", this.url);
             return new GsonRequest(this);
         }
     }

@@ -9,7 +9,6 @@ import com.google.gson.JsonParseException;
 import java.lang.reflect.Type;
 
 import edu.sei.eecs.pku.hermes.model.Order;
-import edu.sei.eecs.pku.hermes.model.User;
 
 /**
  * Created by bilibili on 15/11/29.
@@ -22,7 +21,7 @@ public class OrderDeserializer implements JsonDeserializer<Order> {
         final JsonObject jsonObject = json.getAsJsonObject();
 
         final String orderId = jsonObject.get("orderID").getAsString();
-        final String courierId = jsonObject.get("courierID").getAsString();
+//        final String courierId = jsonObject.get("courierID").getAsString();
         final String address = jsonObject.get("address").getAsString();
         final String appointment = jsonObject.get("appointment").getAsString();
         final long reserveBegin = Order.parseAppointment(appointment, Order.BEGIN);
@@ -39,7 +38,7 @@ public class OrderDeserializer implements JsonDeserializer<Order> {
 
         final Order order = new Order(orderId, address, reserveBegin, reserveEnd);
         order.setRecipientVIPRank(rank);
-        order.setCourierId(courierId);
+//        order.setCourierId(courierId);
         order.setSignNeedTime(signNeedTime);
         order.setState(state);
         order.setArriveTime(arriveTime);

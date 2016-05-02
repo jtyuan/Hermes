@@ -1,7 +1,9 @@
 package edu.sei.eecs.pku.hermes;
 
-import android.support.v7.app.AppCompatActivity;
+import android.annotation.TargetApi;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.ListView;
@@ -81,20 +83,38 @@ public class CompletedOrderActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
         init();
     }
 
     @AfterViews
+    @SuppressWarnings("unchecked")
     void init() {
-        orders = new ArrayList<>();
+//        orders = new ArrayList<>();
         users = new ArrayList<>();
-
+        setupActionBar();
         if (completedList != null) {
 
-            generateData();
+            Bundle bundle = getIntent().getExtras();
+            if (bundle != null) {
+                orders = (ArrayList<Order>) bundle.get("orders");
+            }
+//            generateData();
             TodayAdapter adapter = new TodayAdapter(CompletedOrderActivity.this, R.layout.list_item_today, orders);
             completedList.setAdapter(adapter);
 
+        }
+    }
+
+    /**
+     * Set up the {@link android.app.ActionBar}, if the API is available.
+     */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    private void setupActionBar() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            // Show the Up button in the action bar.
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
     }
 

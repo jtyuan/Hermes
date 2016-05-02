@@ -1,8 +1,7 @@
 package edu.sei.eecs.pku.hermes;
 
-import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.Gravity;
@@ -61,18 +60,13 @@ public class TodayActivity extends AppCompatActivity {
     @Click
     void buttonConfirm() {
         // TODO http request for real list
-
-        Log.d("test", Constants.SCHEDULE_URL + "getOrders?"
-                + "courierID=" + inputCourierId.getText().toString().trim()
-                + "&dispatch_date=" + sdf.format(Calendar.getInstance().getTime()));
-
         GsonRequest gsonRequest = new GsonRequest.RequestBuilder()
 //                .url(Constants.SCHEDULE_URL
 //                        + "getOrders?courierID=" + inputCourierId.getText().toString().trim()
 //                        + "&dispatch_date=" + "20151111")//TODO: should be sdf.format(Calendar.getInstance().getTime()))
-                .url(Constants.SCHEDULE_URL + "getOrders")
-                .addParams("courierID", inputCourierId.getText().toString().trim())
-                .addParams("dispatch_date", "20151123") // TODO: to real date
+                .url(Constants.BASE_URL)
+                .addParams("courier", inputCourierId.getText().toString().trim())
+                .addParams("task", "20151123")
                 .clazz(OrderListGson.class)
                 .successListener(new Response.Listener() {
                     @Override

@@ -15,7 +15,6 @@ import org.json.JSONObject;
 import java.util.Iterator;
 
 import cn.jpush.android.api.JPushInterface;
-import edu.sei.eecs.pku.hermes.MainActivity;
 import edu.sei.eecs.pku.hermes.PlanResultActivity;
 import edu.sei.eecs.pku.hermes.PlanResultActivity_;
 

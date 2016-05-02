@@ -1,25 +1,26 @@
 package edu.sei.eecs.pku.hermes;
 
+import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Handler;
-import android.support.v7.app.AppCompatActivity;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -28,12 +29,14 @@ import android.widget.Toast;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
 import com.lsjwzh.widget.materialloadingprogressbar.CircleProgressBar;
 import com.orhanobut.dialogplus.DialogPlus;
 import com.orhanobut.dialogplus.Holder;
 import com.orhanobut.dialogplus.OnClickListener;
 import com.orhanobut.dialogplus.ViewHolder;
+import com.special.ResideMenu.ResideMenu;
+import com.special.ResideMenu.ResideMenuItem;
+import com.yalantis.phoenix.PullToRefreshView;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Click;
@@ -46,22 +49,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Properties;
 
-import cn.jpush.android.api.JPushInterface;
 import edu.sei.eecs.pku.hermes.configs.Constants;
 import edu.sei.eecs.pku.hermes.model.Failure;
 import edu.sei.eecs.pku.hermes.model.Order;
-import edu.sei.eecs.pku.hermes.model.ReadyOrder;
 import edu.sei.eecs.pku.hermes.model.User;
 import edu.sei.eecs.pku.hermes.utils.adapters.FailureAdapter;
 import edu.sei.eecs.pku.hermes.utils.adapters.TodayAdapter;
 import edu.sei.eecs.pku.hermes.utils.network.GsonRequest;
 import edu.sei.eecs.pku.hermes.utils.network.HttpClientRequest;
-import edu.sei.eecs.pku.hermes.utils.network.OrderListDeserializer;
 import edu.sei.eecs.pku.hermes.utils.network.OrderListGson;
 import edu.sei.eecs.pku.hermes.utils.network.ResultGson;
-import edu.sei.eecs.pku.hermes.utils.network.ScheduledListGson;
 
 @EActivity(R.layout.activity_plan_result)
 public class PlanResultActivity extends AppCompatActivity {
@@ -74,7 +72,7 @@ public class PlanResultActivity extends AppCompatActivity {
     ArrayList<Order> uninformedOrders;
     ArrayList<Order> failedOrders;
 
-    @Extra("orderExtra")
+    @Extra
     ArrayList<Order> completedOrders;
 
     ArrayList<User> users;
@@ -126,13 +124,17 @@ public class PlanResultActivity extends AppCompatActivity {
     @ViewById(R.id.scrollView)
     ScrollView scrollView;
 
+    @ViewById(R.id.pull_to_refresh)
+    PullToRefreshView pullToRefreshView;
+
+    ResideMenu resideMenu;
+
     @Click
     void buttonDone() {
 
         GsonRequest gsonRequest = new GsonRequest.RequestBuilder()
                 .post()
-                .url(Constants.SCHEDULE_URL + "postFeedback")
-                .addParams("orderID", readyOrders.get(0).getOrderId()) // TODO: courierID
+                .url(Constants.BASE_URL + "/delivery/" + readyOrders.get(0).getOrderId())
                 .addParams("real_time", String.valueOf(getCurrentTimeInSecond()))
                 .addParams("type", "0")
                 .addParams("message", "success")
@@ -201,8 +203,7 @@ public class PlanResultActivity extends AppCompatActivity {
 
                                 GsonRequest gsonRequest = new GsonRequest.RequestBuilder()
                                         .post()
-                                        .url(Constants.SCHEDULE_URL + "postFeedback")
-                                        .addParams("orderID", readyOrders.get(0).getOrderId()) // TODO: courierID
+                                        .url(Constants.BASE_URL + "/delivery/" + readyOrders.get(0).getOrderId())
                                         .addParams("real_time", String.valueOf(getCurrentTimeInSecond()))
                                         .addParams("type", "1")
                                         .addParams("message", tvFailure.getText().toString())
@@ -386,10 +387,21 @@ public class PlanResultActivity extends AppCompatActivity {
         dialog.show();
     }
 
+    /**
+     * Set up the {@link android.app.ActionBar}, if the API is available.
+     */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    private void setupActionBar() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            // Show the Up button in the action bar.
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        init();
+//        init(); // this function will be called automatically after views initialized
     }
 
     @Override
@@ -404,7 +416,13 @@ public class PlanResultActivity extends AppCompatActivity {
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.completed:
-                CompletedOrderActivity_.intent(PlanResultActivity.this).start();
+                Intent intent = new Intent(PlanResultActivity.this, CompletedOrderActivity_.class);
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("orders", completedOrders);
+//                CompletedOrderActivity_.intent(PlanResultActivity.this).completedOrders().start();
+                intent.putExtras(bundle);
+                startActivity(intent);
+                overridePendingTransition(R.anim.move_right_in_activity, R.anim.move_left_out_activity);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -416,6 +434,25 @@ public class PlanResultActivity extends AppCompatActivity {
     // layout injection must allow time for view binding
     @AfterViews
     void init() {
+
+
+        // Reside Menu Initialization
+        // attach to current activity;
+        resideMenu = new ResideMenu(this);
+        resideMenu.setBackground(R.drawable.menu_background);
+        resideMenu.attachToActivity(this);
+        resideMenu.setSwipeDirectionDisable(ResideMenu.DIRECTION_RIGHT);
+
+        // create menu items;
+        String titles[] = { "Home", "Profile", "Calendar", "Settings" };
+        int icon[] = { android.R.drawable.ic_menu_agenda, android.R.drawable.ic_menu_zoom, android.R.drawable.ic_menu_agenda, android.R.drawable.ic_menu_agenda };
+
+        for (int i = 0; i < titles.length; i++){
+            ResideMenuItem item = new ResideMenuItem(this, icon[i], titles[i]);
+//            item.setOnClickListener(this);
+            resideMenu.addMenuItem(item,  ResideMenu.DIRECTION_LEFT); // or  ResideMenu.DIRECTION_RIGHT
+        }
+
 
         orders = new ArrayList<>();
         readyOrders = new ArrayList<>();
@@ -430,20 +467,42 @@ public class PlanResultActivity extends AppCompatActivity {
 
         registerMessageReceiver();
 
+        CardView cardView = (CardView) findViewById(R.id.card_view);
+
+//        setupActionBar();
+
         if (waitingList != null && uninformedList != null && failedList != null) {
+
+            cardView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    MapActivity_.intent(PlanResultActivity.this).start();
+                    overridePendingTransition(R.anim.move_right_in_activity, R.anim.move_left_out_activity);
+                }
+            });
+
+            pullToRefreshView.setOnRefreshListener(new PullToRefreshView.OnRefreshListener() {
+                @Override
+                public void onRefresh() {
+                    Toast.makeText(PlanResultActivity.this, "pulled!", Toast.LENGTH_SHORT).show();
+                    pullToRefreshView.setRefreshing(false);
+                }
+            });
+
 
             progressBar.setColorSchemeResources(R.color.colorPrimary);
 
             GsonRequest gsonRequest = new GsonRequest.RequestBuilder()
 //                    .post()
-                    .url(Constants.SCHEDULE_URL + "getSchedule")
-                    .addParams("courierID", "25430") // TODO: courierID
-                    .addParams("dispatch_date", "20151123")
+                    .url(Constants.BASE_URL)
+                    .addParams("courier", "25430") // TODO: courierID
+                    .addParams("task", "20151123")
                     .clazz(OrderListGson.class)
                     .successListener(new Response.Listener() {
                         @Override
                         public void onResponse(Object response) {
 //                            generateData(); // TODO: remove this
+                            Log.d("GsonRequest", "喵喵喵?");
                             llHeaderProgress.setVisibility(View.GONE);
                             scrollView.setVisibility(View.VISIBLE);
                             orders.clear();
@@ -453,6 +512,7 @@ public class PlanResultActivity extends AppCompatActivity {
                                 switch (order.getState()) {
                                     case Constants.STATUS_READY:
                                         readyOrders.add(order);
+//                                        Toast.makeText(PlanResultActivity.this, order.getAddress(), Toast.LENGTH_SHORT).show();
                                         break;
                                     case Constants.STATUS_UNINFORMED:
                                         uninformedOrders.add(order);
@@ -505,12 +565,13 @@ public class PlanResultActivity extends AppCompatActivity {
 //            Order emptyOrder = new Order("没", users.get(0), "啦.已通知订单全部配送完毕", 0, 0);
 //            readyOrders.add(emptyOrder);
 //        }
+//        Toast.makeText(PlanResultActivity.this, String.valueOf(readyOrders.size()), Toast.LENGTH_SHORT).show();
         TodayAdapter adapter1 = new TodayAdapter(PlanResultActivity.this,
                 R.layout.list_item_today, readyOrders.subList(1, readyOrders.size()));
         waitingList.setAdapter(adapter1);
-        if (uninformedOrders.size() > 1) {
+        if (readyOrders.size() > 1) {
             tvWaiting.setVisibility(View.VISIBLE);
-            setListViewHeightBasedOnItems(uninformedList);
+            setListViewHeightBasedOnItems(waitingList);
         } else {
             tvWaiting.setVisibility(View.INVISIBLE);
         }
@@ -526,7 +587,7 @@ public class PlanResultActivity extends AppCompatActivity {
         }
 
         FailureAdapter adapter3 = new FailureAdapter(PlanResultActivity.this,
-                R.layout.list_item_today, failedOrders);
+                R.layout.list_item_fail, failedOrders);
         failedList.setAdapter(adapter3);
         if (failedOrders.size() > 0) {
             tvFailed.setVisibility(View.VISIBLE);
@@ -619,6 +680,11 @@ public class PlanResultActivity extends AppCompatActivity {
 
 
     @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        return resideMenu.dispatchTouchEvent(ev);
+    }
+
+    @Override
     protected void onResume() {
         isForeground = true;
         super.onResume();
@@ -657,4 +723,6 @@ public class PlanResultActivity extends AppCompatActivity {
             PlanResultActivity.this.finish();
         }
     }
+
+
 }

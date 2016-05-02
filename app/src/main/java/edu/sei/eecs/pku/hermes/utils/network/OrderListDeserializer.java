@@ -22,7 +22,13 @@ public class OrderListDeserializer implements JsonDeserializer<OrderListGson> {
 
         final String status = jsonObject.get("status").getAsString();
 
+        final String courierId = jsonObject.get("courierID").getAsString();
+
         final Order[] orders = context.deserialize(jsonObject.get("orders"), Order[].class);
+
+        for (Order o : orders) {
+            o.setCourierId(courierId);
+        }
 
         final OrderListGson list = new OrderListGson();
         list.setStatus(status);

@@ -27,6 +27,10 @@
             android:layout_height="60dp"/>
     </LinearLayout>
 
+    <com.yalantis.phoenix.PullToRefreshView
+        android:id="@+id/pull_to_refresh"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -274,5 +278,5 @@
             </RelativeLayout>
         </RelativeLayout>
     </ScrollView>
-
+    </com.yalantis.phoenix.PullToRefreshView>
 </LinearLayout>

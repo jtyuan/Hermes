@@ -9,7 +9,6 @@ import com.google.gson.JsonParseException;
 import java.lang.reflect.Type;
 
 import edu.sei.eecs.pku.hermes.model.ConflictOrder;
-import edu.sei.eecs.pku.hermes.model.ReadyOrder;
 
 /**
  * Created by bilibili on 15/11/29.

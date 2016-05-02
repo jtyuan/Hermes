@@ -61,6 +61,7 @@
         android:text="Medium Text"
         android:id="@+id/tvAddress"
         android:layout_below="@+id/tvRecipient"
+        android:lines="3"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 

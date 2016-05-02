@@ -1,10 +1,7 @@
 package edu.sei.eecs.pku.hermes;
 
 import android.app.Service;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -14,7 +11,6 @@ import java.util.Set;
 
 import cn.jpush.android.api.JPushInterface;
 import cn.jpush.android.api.TagAliasCallback;
-import edu.sei.eecs.pku.hermes.utils.PushReceiver;
 import edu.sei.eecs.pku.hermes.utils.PushUtil;
 
 @EService
@@ -69,7 +65,7 @@ public class PushService extends Service {
                     Log.e(TAG, logs);
             }
 
-            PushUtil.showToast(logs, getApplicationContext());
+//            PushUtil.showToast(logs, getApplicationContext());
         }
 
     };

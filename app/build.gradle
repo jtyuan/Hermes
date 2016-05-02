@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.neenbedankt.android-apt'
 
 
-def AAVersion = '3.3.2'
+def AAVersion = '4.0.0'
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
@@ -20,6 +20,11 @@ dependencies {
     compile 'com.squareup.okio:okio:1.6.0'
     compile 'com.android.support:design:23.1.1'
     compile 'com.lsjwzh:materialloadingprogressbar:0.5.8-RELEASE'
+    compile 'me.imid.swipebacklayout.lib:library:1.0.0'
+    compile 'com.yalantis:phoenix:1.2.3'
+    compile 'com.specyci:residemenu:1.6+'
+    compile 'de.hdodenhof:circleimageview:2.0.0'
+    compile 'info.hoang8f:fbutton:1.0.5'
 }
 
 def getManifestByVariant(variant) {

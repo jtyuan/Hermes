@@ -42,4 +42,17 @@
     <string name="orderIDTitle">订单号：</string>
     <string name="addressTitle">目标地址：</string>
     <string name="title_activity_main">快递路径规划</string>
+    <string name="title_activity_login">登录</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_email">用户名(快递员ID)</string>
+    <string name="prompt_password">密码</string>
+    <string name="action_sign_in_short">登录</string>
+    <string name="error_invalid_email">This email address is invalid</string>
+    <string name="error_invalid_password">输入密码过短</string>
+    <string name="error_incorrect_password">输入密码错误</string>
+    <string name="error_field_required">该项不能为空</string>
+    <string name="permission_rationale">"Contacts permissions are needed for providing email
+        completions."
+    </string>
 </resources>

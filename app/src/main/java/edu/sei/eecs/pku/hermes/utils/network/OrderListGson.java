@@ -1,7 +1,5 @@
 package edu.sei.eecs.pku.hermes.utils.network;
 
-import java.util.ArrayList;
-
 import edu.sei.eecs.pku.hermes.model.Order;
 
 /**
