@@ -17,5 +17,7 @@ public class Constants {
     public static final String CLIENT_ID = "e5256814efbbe3534859";
     public static final String CLIENT_SECRET = "5a50245e9341ffdcf137c22339432c699e6c5e38";
 
+    public static final long SCHEDULE_INTERVAL = 43200000;
+
     // -1 起始点， 0 未发送短信，1 已发短信，2 已送达，3冲突
 }

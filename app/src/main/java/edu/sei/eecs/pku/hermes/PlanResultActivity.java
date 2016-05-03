@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -45,6 +46,7 @@ import org.androidannotations.annotations.Extra;
 import org.androidannotations.annotations.ItemClick;
 import org.androidannotations.annotations.ViewById;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -65,12 +67,15 @@ import edu.sei.eecs.pku.hermes.utils.network.ResultGson;
 public class PlanResultActivity extends AppCompatActivity {
     public static boolean isForeground = false;
 
-    RequestQueue queue;
+    private SharedPreferences scheduleInfo;
+    private long lastSchedule;
 
-    ArrayList<Order> orders;
-    ArrayList<Order> readyOrders;
-    ArrayList<Order> uninformedOrders;
-    ArrayList<Order> failedOrders;
+    private RequestQueue queue;
+
+    private ArrayList<Order> orders;
+    private ArrayList<Order> readyOrders;
+    private ArrayList<Order> uninformedOrders;
+    private ArrayList<Order> failedOrders;
 
     @Extra
     ArrayList<Order> completedOrders;
@@ -142,7 +147,6 @@ public class PlanResultActivity extends AppCompatActivity {
                 .successListener(new Response.Listener() {
                     @Override
                     public void onResponse(Object response) {
-//                            generateData(); // TODO: remove this
                         if (((ResultGson)response).status.equals("ok")) {
                             Log.d("response", ((ResultGson)response).status);
                             completedOrders.add(readyOrders.get(0));
@@ -290,7 +294,7 @@ public class PlanResultActivity extends AppCompatActivity {
         View holderView = dialog.getHolderView();
         ((TextView)holderView.findViewById(R.id.tvOrderId)).setText(clickItem.getOrderId());
         ((TextView)holderView.findViewById(R.id.tvName)).setText(clickItem.getRecipientName());
-        ((TextView)holderView.findViewById(R.id.tvGender)).setText("先生"); // TODO
+        ((TextView)holderView.findViewById(R.id.tvGender)).setText("先生");
         ((TextView)holderView.findViewById(R.id.tvPhone)).setText(clickItem.getRecipientPhone());
         ((TextView)holderView.findViewById(R.id.tvAddress)).setText(clickItem.getAddress());
         ((TextView)holderView.findViewById(R.id.tvRes1)).setText(clickItem.getReserveBegin());
@@ -375,7 +379,7 @@ public class PlanResultActivity extends AppCompatActivity {
 
         ((TextView)holderView.findViewById(R.id.tvOrderId)).setText(clickItem.getOrderId());
         ((TextView)holderView.findViewById(R.id.tvName)).setText(clickItem.getRecipientName());
-        ((TextView)holderView.findViewById(R.id.tvGender)).setText("先生"); // TODO
+        ((TextView)holderView.findViewById(R.id.tvGender)).setText("先生");
         ((TextView)holderView.findViewById(R.id.tvPhone)).setText(clickItem.getRecipientPhone());
         ((TextView)holderView.findViewById(R.id.tvAddress)).setText(clickItem.getAddress());
         ((TextView)holderView.findViewById(R.id.tvReservationTitle)).setText("失败原因：");
@@ -401,6 +405,9 @@ public class PlanResultActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        scheduleInfo = getSharedPreferences("schedule_info", MODE_PRIVATE);
+        lastSchedule = scheduleInfo.getLong("last_schedule", 0);
 //        init(); // this function will be called automatically after views initialized
     }
 
@@ -492,17 +499,23 @@ public class PlanResultActivity extends AppCompatActivity {
 
             progressBar.setColorSchemeResources(R.color.colorPrimary);
 
-            GsonRequest gsonRequest = new GsonRequest.RequestBuilder()
+
+            schedule();
+        }
+    }
+
+    private void schedule() {
+        GsonRequest gsonRequest;
+        if (lastSchedule + Constants.SCHEDULE_INTERVAL <= System.currentTimeMillis()) {
+            gsonRequest = new GsonRequest.RequestBuilder()
 //                    .post()
                     .url(Constants.BASE_URL)
-                    .addParams("courier", "25430") // TODO: courierID
-                    .addParams("task", "20151123")
+                    .addParams("courier", InitApplication.courier_id)
+                    .addParams("task", getDateString())
                     .clazz(OrderListGson.class)
                     .successListener(new Response.Listener() {
                         @Override
                         public void onResponse(Object response) {
-//                            generateData(); // TODO: remove this
-                            Log.d("GsonRequest", "喵喵喵?");
                             llHeaderProgress.setVisibility(View.GONE);
                             scrollView.setVisibility(View.VISIBLE);
                             orders.clear();
@@ -535,8 +548,51 @@ public class PlanResultActivity extends AppCompatActivity {
                         }
                     })
                     .build();
-            queue.add(gsonRequest);
+        } else {
+            gsonRequest = new GsonRequest.RequestBuilder()
+//                    .post()
+                    .url(Constants.BASE_URL)
+                    .addParams("courier", InitApplication.courier_id)
+                    .addParams("task", getDateString())
+                    .addParams("lazy", "") // lazy mode, fetch order list without rescheduling
+                    .clazz(OrderListGson.class)
+                    .successListener(new Response.Listener() {
+                        @Override
+                        public void onResponse(Object response) {
+                            llHeaderProgress.setVisibility(View.GONE);
+                            scrollView.setVisibility(View.VISIBLE);
+                            orders.clear();
+                            orders.addAll(Arrays.asList(((OrderListGson) response).getOrders()));
+                            orders.remove(0);
+                            for (Order order : orders) {
+                                switch (order.getState()) {
+                                    case Constants.STATUS_READY:
+                                        readyOrders.add(order);
+//                                        Toast.makeText(PlanResultActivity.this, order.getAddress(), Toast.LENGTH_SHORT).show();
+                                        break;
+                                    case Constants.STATUS_UNINFORMED:
+                                        uninformedOrders.add(order);
+                                        break;
+                                    case Constants.STATUS_COMPLETED:
+                                        completedOrders.add(order);
+                                        break;
+                                    case Constants.STATUS_FAILED:
+                                        failedOrders.add(order);
+                                        break;
+                                }
+                            }
+                            refreshList();
+                        }
+                    })
+                    .errorListener(new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Toast.makeText(PlanResultActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
+                        }
+                    })
+                    .build();
         }
+        queue.add(gsonRequest);
     }
 
     private void refreshList() {
@@ -725,4 +781,8 @@ public class PlanResultActivity extends AppCompatActivity {
     }
 
 
+    public static String getDateString() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+        return dateFormat.format(Calendar.getInstance().getTime());
+    }
 }

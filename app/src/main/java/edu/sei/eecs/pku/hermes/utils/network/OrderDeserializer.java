@@ -23,6 +23,8 @@ public class OrderDeserializer implements JsonDeserializer<Order> {
         final String orderId = jsonObject.get("orderID").getAsString();
 //        final String courierId = jsonObject.get("courierID").getAsString();
         final String address = jsonObject.get("address").getAsString();
+        final String name = jsonObject.get("name").getAsString();
+        final String phone = jsonObject.get("phone").getAsString();
         final String appointment = jsonObject.get("appointment").getAsString();
         final long reserveBegin = Order.parseAppointment(appointment, Order.BEGIN);
         final long reserveEnd = Order.parseAppointment(appointment, Order.END);
@@ -39,6 +41,8 @@ public class OrderDeserializer implements JsonDeserializer<Order> {
         final Order order = new Order(orderId, address, reserveBegin, reserveEnd);
         order.setRecipientVIPRank(rank);
 //        order.setCourierId(courierId);
+        order.setRecipientName(name);
+        order.setRecipientPhone(phone);
         order.setSignNeedTime(signNeedTime);
         order.setState(state);
         order.setArriveTime(arriveTime);

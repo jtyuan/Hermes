@@ -13,16 +13,23 @@
     tools:context="edu.sei.eecs.pku.hermes.LoginActivity"
     android:background="@color/activityBackground">
 
-    <!-- Login progress -->
-    <com.lsjwzh.widget.materialloadingprogressbar.CircleProgressBar
-        android:id="@+id/login_progress"
-        app:mlpb_arrow_height="5dp"
-        app:mlpb_arrow_width="10dp"
-        app:mlpb_progress_stoke_width="5dp"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:visibility="gone"/>
+    <LinearLayout
+        android:id="@+id/llHeaderProgress"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone" >
 
+
+        <com.lsjwzh.widget.materialloadingprogressbar.CircleProgressBar
+            android:id="@+id/login_progress"
+            app:mlpb_arrow_height="5dp"
+            app:mlpb_arrow_width="10dp"
+            app:mlpb_progress_stoke_width="5dp"
+            android:layout_width="60dp"
+            android:layout_height="60dp"/>
+    </LinearLayout>
 
     <ScrollView
         android:layout_alignParentBottom="true"

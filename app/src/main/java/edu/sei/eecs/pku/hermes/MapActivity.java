@@ -91,7 +91,7 @@ public class MapActivity extends SwipeBackActivity implements BaiduMap.OnMapClic
         super.onCreate(savedInstanceState);
 //        CharSequence titleLable = "路线规划功能";
 //        setTitle(titleLable);
-        init();
+//        init();
     }
 
     @AfterViews

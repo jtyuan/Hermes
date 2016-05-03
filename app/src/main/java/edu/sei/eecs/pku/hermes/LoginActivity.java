@@ -29,6 +29,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -65,7 +66,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     /**
      * A dummy authentication store containing known user names and passwords.
-     * TODO: remove after connecting to a real authentication system.
      */
     private static final String[] DUMMY_CREDENTIALS = new String[]{
             "jty2005@qq.com:635241"
@@ -92,6 +92,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     @ViewById(R.id.login_form)
     public View mLoginFormView;
+
+    @ViewById(R.id.llHeaderProgress)
+    LinearLayout llHeaderProgress;
 
     @Click
     void email_sign_in_button() {
@@ -125,24 +128,23 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 return false;
             }
         });
-        mProgressView.setColorSchemeResources(R.color.colorAccent);
-        Toast.makeText(LoginActivity.this, "fuckme", Toast.LENGTH_SHORT).show();
+        mProgressView.setColorSchemeResources(R.color.colorPrimary);
         boolean isLogged = loginInfo.getBoolean("isLogged", false);
+        String username = loginInfo.getString("courier_id", "");
+        mUsernameView.setText(username);
 
         if (isLogged) {
-            String username = loginInfo.getString("username", "请输入用户名");
+
             String refresh_token = loginInfo.getString("refresh_token", "default");
 
             long expires_by = loginInfo.getLong("expires_by", 0);
             if (System.currentTimeMillis()/1000 < expires_by) {
-                mUsernameView.setText(username);
+
                 relogin(username, refresh_token);
             } else {
                 Toast.makeText(LoginActivity.this, "长期未使用，请重新登录", Toast.LENGTH_SHORT).show();
             }
         }
-
-
     }
 
     private void relogin(final String username, final String refresh_token) {
@@ -302,8 +304,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                         public void onErrorResponse(VolleyError error) {
                             Toast.makeText(LoginActivity.this, "登录失败，请检查您的用户名密码", Toast.LENGTH_LONG).show();
                             showProgress(false);
-                            editor.putBoolean("isLogged", false);
-                            editor.apply();
                         }
                     })
                     .build();
@@ -329,13 +329,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
                         editor = loginInfo.edit();
                         editor.putBoolean("isLogged", true);
-                        editor.putString("username", username);
+                        editor.putBoolean("isCourier", true);
+                        editor.putString("courier_id", username);
                         editor.putString("access_token", access_token);
                         editor.putString("refresh_token", refresh_token);
                         editor.putLong("expires_by", System.currentTimeMillis()/1000 + expires_in);
                         editor.apply();
 
-                        PlanResultActivity_.intent(LoginActivity.this).start();
+                        TodayActivity_.intent(LoginActivity.this).start();
                         overridePendingTransition(R.anim.move_right_in_activity, R.anim.move_left_out_activity);
                         finish();
                     }
@@ -345,8 +346,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     public void onErrorResponse(VolleyError error) {
                         Toast.makeText(LoginActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
                         showProgress(false);
-                        editor.putBoolean("isLogged", false);
-                        editor.apply();
                     }
                 })
                 .build();
@@ -354,12 +353,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     }
 
     private boolean isEmailValid(String email) {
-        //TODO: Replace this with your own logic
         return email.contains("@");
     }
 
     private boolean isPasswordValid(String password) {
-        //TODO: Replace this with your own logic
         return password.length() > 4;
     }
 
@@ -383,18 +380,18 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 }
             });
 
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mProgressView.animate().setDuration(shortAnimTime).alpha(
+            llHeaderProgress.setVisibility(show ? View.VISIBLE : View.GONE);
+            llHeaderProgress.animate().setDuration(shortAnimTime).alpha(
                     show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+                    llHeaderProgress.setVisibility(show ? View.VISIBLE : View.GONE);
                 }
             });
         } else {
             // The ViewPropertyAnimator APIs are not available, so simply show
             // and hide the relevant UI components.
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+            llHeaderProgress.setVisibility(show ? View.VISIBLE : View.GONE);
             mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
         }
     }
@@ -469,15 +466,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-
-            try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
-            }
-
 
             for (String credential : DUMMY_CREDENTIALS) {
                 String[] pieces = credential.split(":");
@@ -487,7 +475,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 }
             }
 
-            // TODO: register the new account here.
             return true;
         }
 

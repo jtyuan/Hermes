@@ -1,10 +1,12 @@
 package edu.sei.eecs.pku.hermes;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -18,7 +20,10 @@ import com.orhanobut.dialogplus.DialogPlus;
 import com.orhanobut.dialogplus.Holder;
 import com.orhanobut.dialogplus.OnClickListener;
 import com.orhanobut.dialogplus.ViewHolder;
+import com.special.ResideMenu.ResideMenu;
+import com.special.ResideMenu.ResideMenuItem;
 
+import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ItemClick;
@@ -38,8 +43,9 @@ import edu.sei.eecs.pku.hermes.utils.network.GsonRequest;
 import edu.sei.eecs.pku.hermes.utils.network.HttpClientRequest;
 import edu.sei.eecs.pku.hermes.utils.network.OrderListGson;
 
+
 @EActivity(R.layout.activity_today)
-public class TodayActivity extends AppCompatActivity {
+public class TodayActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd", Locale.CHINA);
 
@@ -56,6 +62,16 @@ public class TodayActivity extends AppCompatActivity {
 
     @ViewById(R.id.cardToday)
     CardView cardToday;
+
+    private SharedPreferences loginInfo;
+    private ResideMenu resideMenu;
+
+    private boolean isCourier = false;
+    private ResideMenuItem itemHome;
+    private ResideMenuItem itemToday;
+    private ResideMenuItem itemHistory;
+    private ResideMenuItem itemLogout;
+    private ResideMenuItem itemMyList;
 
     @Click
     void buttonConfirm() {
@@ -156,15 +172,46 @@ public class TodayActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        init();
+//        init();
     }
 
-    private void init() {
+    @AfterViews
+    public void init() {
         orders = new ArrayList<>();
         users = new ArrayList<>();
 
         // Get a Request Queue
         queue = HttpClientRequest.getInstance(this.getApplicationContext()).getRequestQueue();
+
+        resideMenu = new ResideMenu(this);
+        resideMenu.setBackground(R.drawable.menu_background);
+        resideMenu.attachToActivity(this);
+        resideMenu.setSwipeDirectionDisable(ResideMenu.DIRECTION_RIGHT);
+
+        itemHome     = new ResideMenuItem(this, R.drawable.ic_menu_home,     "主页");
+        itemToday    = new ResideMenuItem(this, android.R.drawable.ic_menu_today,  "今日配送");
+        itemHistory  = new ResideMenuItem(this, android.R.drawable.ic_menu_recent_history, "配送历史");
+        itemLogout   = new ResideMenuItem(this, android.R.drawable.ic_menu_close_clear_cancel, "登出");
+        itemMyList   = new ResideMenuItem(this, android.R.drawable.ic_menu_my_calendar, "我的订单");
+
+        itemHome.setOnClickListener(this);
+        itemToday.setOnClickListener(this);
+        itemHistory.setOnClickListener(this);
+        itemLogout.setOnClickListener(this);
+        itemMyList.setOnClickListener(this);
+
+        loginInfo = getSharedPreferences("login", MODE_PRIVATE);
+        isCourier = loginInfo.getBoolean("isCourier", false);
+
+        resideMenu.addMenuItem(itemHome, ResideMenu.DIRECTION_LEFT);
+
+        if (isCourier) {
+            resideMenu.addMenuItem(itemToday, ResideMenu.DIRECTION_LEFT);
+            resideMenu.addMenuItem(itemHistory, ResideMenu.DIRECTION_LEFT);
+        } else {
+            resideMenu.addMenuItem(itemMyList, ResideMenu.DIRECTION_LEFT);
+        }
+        resideMenu.addMenuItem(itemLogout, ResideMenu.DIRECTION_LEFT);
     }
 
     private void generateData() {
@@ -194,5 +241,34 @@ public class TodayActivity extends AppCompatActivity {
 //            calendar2.add(Calendar.MINUTE, 15);
 //            orders.add(order);
 //        }
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (v == itemHome) {
+
+        } else if (v == itemToday) {
+
+        } else if (v == itemHistory) {
+
+        } else if (v == itemMyList) {
+
+        } else if (v == itemLogout) {
+            SharedPreferences.Editor editor = loginInfo.edit();
+            editor.putBoolean("isLogged", false);
+            editor.putString("access_token", "");
+            editor.putString("refresh_token", "");
+            editor.putLong("expires_by", 0);
+            editor.apply();
+            LoginActivity_.intent(TodayActivity.this).start();
+            overridePendingTransition(R.anim.move_left_in_activity, R.anim.move_right_out_activity);
+            finish();
+        }
+    }
+
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        return resideMenu.dispatchTouchEvent(ev);
     }
 }
