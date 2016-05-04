@@ -11,4 +11,11 @@
     <dimen name="sample_text_size">12sp</dimen>
     <dimen name="margin">8dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
+    <dimen name="app_bar_height">180dp</dimen>
+    <dimen name="text_margin">16dp</dimen>
+
+
+    <dimen name="text_width">120dp</dimen>
+    <dimen name="text_final_width">32dp</dimen>
+    <dimen name="spacing_normal">16dp</dimen>
 </resources>

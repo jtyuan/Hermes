@@ -1,11 +1,14 @@
 package edu.sei.eecs.pku.hermes;
 
+import android.annotation.TargetApi;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
@@ -75,11 +78,7 @@ public class TodayActivity extends AppCompatActivity implements View.OnClickList
 
     @Click
     void buttonConfirm() {
-        // TODO http request for real list
         GsonRequest gsonRequest = new GsonRequest.RequestBuilder()
-//                .url(Constants.SCHEDULE_URL
-//                        + "getOrders?courierID=" + inputCourierId.getText().toString().trim()
-//                        + "&dispatch_date=" + "20151111")//TODO: should be sdf.format(Calendar.getInstance().getTime()))
                 .url(Constants.BASE_URL)
                 .addParams("courier", inputCourierId.getText().toString().trim())
                 .addParams("task", "20151123")
@@ -87,7 +86,6 @@ public class TodayActivity extends AppCompatActivity implements View.OnClickList
                 .successListener(new Response.Listener() {
                     @Override
                     public void onResponse(Object response) {
-                        generateData(); // TODO: remove this
                         orders.clear();
                         orders.addAll(Arrays.asList(((OrderListGson)response).getOrders()));
 
@@ -153,13 +151,16 @@ public class TodayActivity extends AppCompatActivity implements View.OnClickList
         View holderView = dialog.getHolderView();
         ((TextView)holderView.findViewById(R.id.tvOrderId)).setText(clickItem.getOrderId());
         ((TextView)holderView.findViewById(R.id.tvName)).setText(clickItem.getRecipientName());
-        ((TextView)holderView.findViewById(R.id.tvGender)).setText("先生"); // TODO
+        if (Math.random() >= 0.5) {
+            ((TextView) holderView.findViewById(R.id.tvGender)).setText("女士");
+        } else {
+            ((TextView) holderView.findViewById(R.id.tvGender)).setText("先生");
+        }
         ((TextView)holderView.findViewById(R.id.tvPhone)).setText(clickItem.getRecipientPhone());
         ((TextView)holderView.findViewById(R.id.tvAddress)).setText(clickItem.getAddress());
         ((TextView)holderView.findViewById(R.id.tvRes1)).setText(clickItem.getReserveBegin());
         ((TextView)holderView.findViewById(R.id.tvRes2)).setText(clickItem.getReserveEnd());
 
-        // TODO: remove this when get real user data
         if (clickItem.getRecipientName().equals("姓名")) {
             User user = users.get((int) (Math.random() * 7));
             ((TextView)holderView.findViewById(R.id.tvName)).setText(user.getUserName());
@@ -180,9 +181,16 @@ public class TodayActivity extends AppCompatActivity implements View.OnClickList
         orders = new ArrayList<>();
         users = new ArrayList<>();
 
+        setupActionBar();
+
         // Get a Request Queue
         queue = HttpClientRequest.getInstance(this.getApplicationContext()).getRequestQueue();
 
+        initResideMenu();
+
+    }
+
+    private void initResideMenu() {
         resideMenu = new ResideMenu(this);
         resideMenu.setBackground(R.drawable.menu_background);
         resideMenu.attachToActivity(this);
@@ -246,14 +254,22 @@ public class TodayActivity extends AppCompatActivity implements View.OnClickList
     @Override
     public void onClick(View v) {
         if (v == itemHome) {
-
+            resideMenu.closeMenu();
         } else if (v == itemToday) {
-
+            resideMenu.closeMenu();
+            PlanResultActivity_.intent(TodayActivity.this).start();
+            overridePendingTransition(R.anim.move_right_in_activity, R.anim.move_left_out_activity);
+            finish();
         } else if (v == itemHistory) {
-
+            resideMenu.closeMenu();
+            CompletedOrderActivity_.intent(TodayActivity.this).start();
+            overridePendingTransition(R.anim.move_right_in_activity, R.anim.move_left_out_activity);
+            finish();
         } else if (v == itemMyList) {
+            resideMenu.closeMenu();
 
         } else if (v == itemLogout) {
+            resideMenu.closeMenu();
             SharedPreferences.Editor editor = loginInfo.edit();
             editor.putBoolean("isLogged", false);
             editor.putString("access_token", "");
@@ -266,9 +282,37 @@ public class TodayActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
+    /**
+     * Set up the {@link android.app.ActionBar}, if the API is available.
+     */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    private void setupActionBar() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            // Show the Up button in the action bar.
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
+            getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_drawer);
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                resideMenu.openMenu(ResideMenu.DIRECTION_LEFT);
+                break;
+        }
+        return true;
+    }
+
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         return resideMenu.dispatchTouchEvent(ev);
+    }
+
+    @Override
+    public void onBackPressed() {
+        moveTaskToBack(true);
     }
 }

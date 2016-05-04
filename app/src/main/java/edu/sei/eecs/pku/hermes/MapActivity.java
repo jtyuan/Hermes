@@ -1,15 +1,21 @@
 package edu.sei.eecs.pku.hermes;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.RadioGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,6 +23,7 @@ import com.baidu.location.BDLocation;
 import com.baidu.location.BDLocationListener;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
+import com.baidu.mapapi.SDKInitializer;
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BitmapDescriptor;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
@@ -27,6 +34,7 @@ import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
 import com.baidu.mapapi.map.MyLocationConfiguration;
 import com.baidu.mapapi.map.MyLocationData;
+import com.baidu.mapapi.map.Text;
 import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.overlayutil.BikingRouteOverlay;
 import com.baidu.mapapi.overlayutil.DrivingRouteOverlay;
@@ -39,33 +47,44 @@ import com.baidu.mapapi.search.route.BikingRouteLine;
 import com.baidu.mapapi.search.route.BikingRoutePlanOption;
 import com.baidu.mapapi.search.route.BikingRouteResult;
 import com.baidu.mapapi.search.route.DrivingRouteLine;
-import com.baidu.mapapi.search.route.DrivingRoutePlanOption;
 import com.baidu.mapapi.search.route.DrivingRouteResult;
 import com.baidu.mapapi.search.route.OnGetRoutePlanResultListener;
 import com.baidu.mapapi.search.route.PlanNode;
 import com.baidu.mapapi.search.route.RoutePlanSearch;
 import com.baidu.mapapi.search.route.TransitRouteLine;
-import com.baidu.mapapi.search.route.TransitRoutePlanOption;
 import com.baidu.mapapi.search.route.TransitRouteResult;
 import com.baidu.mapapi.search.route.WalkingRouteLine;
-import com.baidu.mapapi.search.route.WalkingRoutePlanOption;
 import com.baidu.mapapi.search.route.WalkingRouteResult;
+import com.special.ResideMenu.ResideMenu;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
 
-import me.imid.swipebacklayout.lib.SwipeBackLayout;
+import java.util.ArrayList;
+
+import edu.sei.eecs.pku.hermes.model.Order;
+import info.hoang8f.widget.FButton;
 import me.imid.swipebacklayout.lib.app.SwipeBackActivity;
 
 @EActivity(R.layout.activity_map)
-public class MapActivity extends SwipeBackActivity implements BaiduMap.OnMapClickListener,
+public class MapActivity extends AppCompatActivity implements BaiduMap.OnMapClickListener,
         OnGetRoutePlanResultListener {
+
+
+    private static final float PERCENTAGE_TO_SHOW_TITLE_AT_TOOLBAR  = 0.5f;
+    private static final float PERCENTAGE_TO_HIDE_TITLE_DETAILS     = 0.5f;
+    private static final int ALPHA_ANIMATIONS_DURATION              = 200;
+
+
+    private boolean isTopTitleVisible = false;
+    private boolean isBottomTitleVisible = true;
+
     // 浏览路线节点相关
     @ViewById(R.id.pre)
-    Button mBtnPre; // 上一个节点
+    FButton mBtnPre; // 上一个节点
     @ViewById(R.id.next)
-    Button mBtnNext; // 下一个节点
+    FButton mBtnNext; // 下一个节点
     int nodeIndex = -1; // 节点索引,供浏览节点时使用
     RouteLine route = null;
     OverlayManager routeOverlay = null;
@@ -87,42 +106,134 @@ public class MapActivity extends SwipeBackActivity implements BaiduMap.OnMapClic
     private static LatLng LatLng_start;
 
 
+    @ViewById(R.id.scroll)
+    NestedScrollView scrollView;
+    @ViewById(R.id.fab)
+    FloatingActionButton fab;
+
+    @ViewById(R.id.container)
+    CoordinatorLayout container;
+
+    @ViewById(R.id.app_bar)
+    AppBarLayout appbar;
+
+    @ViewById(R.id.toolbar)
+    Toolbar toolbar;
+
+    @ViewById(R.id.bottom_title)
+    LinearLayout bottomTitle;
+
+    @ViewById(R.id.top_title)
+    TextView topTitle;
+
+    @ViewById(R.id.title_contact)
+    TextView titleContact;
+
+    @ViewById(R.id.title_address)
+    TextView titleAddress;
+
+    @ViewById(R.id.title_appointment)
+    TextView titleArrive;
+
+    @ViewById(R.id.title_wait)
+    TextView titleWait;
+
+    Order current;
+
+    private LatLng currentLocation = null;
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        CharSequence titleLable = "路线规划功能";
-//        setTitle(titleLable);
-//        init();
+
+        SDKInitializer.initialize(this.getApplication());
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null) {
+            current = (Order) bundle.get("current");
+        } else {
+            current = new Order("-1", "北京");
+        }
     }
 
     @AfterViews
     public void init() {
-//        setupActionBar();
-        if (mMapView != null) {
-            // 初始化地图
-            mBaidumap = mMapView.getMap();
-            mBaidumap.setMyLocationEnabled(true);
-            mLocClient = new LocationClient(this);
-            mLocClient.registerLocationListener(myListener);
-            LocationClientOption option = new LocationClientOption();
-            option.setOpenGps(true); // 打开gps
-            option.setCoorType("bd09ll"); // 设置坐标类型
-            option.setScanSpan(1000);
-            mLocClient.setLocOption(option);
-            mLocClient.start();
-            MyLocationConfiguration.LocationMode mCurrentMode = MyLocationConfiguration.LocationMode.COMPASS;
-            mBaidumap
-                    .setMyLocationConfigeration(new MyLocationConfiguration(
-                            mCurrentMode, true, null));
-            mBtnPre.setVisibility(View.INVISIBLE);
-            mBtnNext.setVisibility(View.INVISIBLE);
-            // 地图点击事件处理
-            mBaidumap.setOnMapClickListener(this);
-            // 初始化搜索模块，注册事件监听
-            mSearch = RoutePlanSearch.newInstance();
-            mSearch.setOnGetRoutePlanResultListener(this);
-//            searchButtonProcess();
-        }
 
+        setupActionBar();
+        appbar.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+            @Override
+            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+                int maxScroll = appBarLayout.getTotalScrollRange();
+                float percentage = (float) Math.abs(verticalOffset) / (float) maxScroll;
+
+                handleAlphaOnTitle(percentage);
+                handleToolbarTitleVisibility(percentage);
+            }
+        });
+        startAlphaAnimation(topTitle, 0, View.INVISIBLE);
+
+        titleContact.setText(getResources().getString(R.string.title_contact_map,
+                current.getRecipientName(), current.getRecipientPhone()));
+        titleAddress.setText(getResources().getString(R.string.title_address_map,
+                current.getAddress()));
+        titleArrive.setText(getResources().getString(R.string.title_arrive_map,
+                current.getEstimation()));
+        titleWait.setText(getResources().getString(R.string.title_wait_map,
+                current.getWaitTime()));
+        topTitle.setText(getResources().getString(R.string.title_contact_map,
+                current.getRecipientName(), current.getRecipientPhone()));
+
+
+        // 初始化地图
+        mBaidumap = mMapView.getMap();
+        mBaidumap.setMyLocationEnabled(true);
+        mLocClient = new LocationClient(this);
+        mLocClient.registerLocationListener(myListener);
+        LocationClientOption option = new LocationClientOption();
+        option.setOpenGps(true); // 打开gps
+        option.setCoorType("bd09ll"); // 设置坐标类型
+        option.setScanSpan(1000);
+        mLocClient.setLocOption(option);
+        mLocClient.start();
+        MyLocationConfiguration.LocationMode mCurrentMode = MyLocationConfiguration.LocationMode.NORMAL;
+        mBaidumap
+                .setMyLocationConfigeration(new MyLocationConfiguration(
+                        mCurrentMode, true, null));
+        mBtnPre.setVisibility(View.INVISIBLE);
+        mBtnNext.setVisibility(View.INVISIBLE);
+        // 地图点击事件处理
+        mBaidumap.setOnMapClickListener(this);
+        // 初始化搜索模块，注册事件监听
+        mSearch = RoutePlanSearch.newInstance();
+        mSearch.setOnGetRoutePlanResultListener(this);
+//        searchButtonProcess();
+
+
+
+        // prevent scrollview from intercepting the touch event of baidu map
+        View v = mMapView.getChildAt(0);
+        v.setOnTouchListener(new View.OnTouchListener() {
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if(event.getAction() == MotionEvent.ACTION_UP){
+                    scrollView.requestDisallowInterceptTouchEvent(false);
+                }else{
+                    scrollView.requestDisallowInterceptTouchEvent(true);
+                }
+                return false;
+            }
+        });
+
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Snackbar.make(view, "定位中...", Snackbar.LENGTH_SHORT)
+                        .setAction("Action", null).show();
+                zoomToPoint(currentLocation);
+                Snackbar.make(view, "定位完毕: " + currentLocation.longitude + "," + currentLocation.latitude, Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
+        });
     }
 
     /**
@@ -130,10 +241,55 @@ public class MapActivity extends SwipeBackActivity implements BaiduMap.OnMapClic
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     private void setupActionBar() {
+
+        setSupportActionBar(toolbar);
+        setTitle("");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             // Show the Up button in the action bar.
-            getActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
+    }
+
+    private void handleToolbarTitleVisibility(float percentage) {
+        if (percentage >= PERCENTAGE_TO_SHOW_TITLE_AT_TOOLBAR) {
+
+            if(!isTopTitleVisible) {
+                startAlphaAnimation(topTitle, ALPHA_ANIMATIONS_DURATION, View.VISIBLE);
+                isTopTitleVisible = true;
+            }
+
+        } else {
+
+            if (isTopTitleVisible) {
+                startAlphaAnimation(topTitle, ALPHA_ANIMATIONS_DURATION, View.INVISIBLE);
+                isTopTitleVisible = false;
+            }
+        }
+    }
+
+    private void handleAlphaOnTitle(float percentage) {
+        if (percentage >= PERCENTAGE_TO_HIDE_TITLE_DETAILS) {
+            if(isBottomTitleVisible) {
+                startAlphaAnimation(bottomTitle, ALPHA_ANIMATIONS_DURATION, View.INVISIBLE);
+                isBottomTitleVisible = false;
+            }
+
+        } else {
+            if (!isBottomTitleVisible) {
+                startAlphaAnimation(bottomTitle, ALPHA_ANIMATIONS_DURATION, View.VISIBLE);
+                isBottomTitleVisible = true;
+            }
+        }
+    }
+
+    public static void startAlphaAnimation (View v, long duration, int visibility) {
+        AlphaAnimation alphaAnimation = (visibility == View.VISIBLE)
+                ? new AlphaAnimation(0f, 1f)
+                : new AlphaAnimation(1f, 0f);
+
+        alphaAnimation.setDuration(duration);
+        alphaAnimation.setFillAfter(true);
+        v.startAnimation(alphaAnimation);
     }
 
     /**
@@ -149,20 +305,21 @@ public class MapActivity extends SwipeBackActivity implements BaiduMap.OnMapClic
         // 设置起终点信息，对于tranist search 来说，城市名无意义
         PlanNode stNode = PlanNode.withLocation(LatLng_start);
 //        PlanNode stNode = PlanNode.withCityNameAndPlaceName("北京", "北京大学45乙");
-        PlanNode enNode = PlanNode.withCityNameAndPlaceName("北京", "北京大学理科一号楼");
+//        PlanNode enNode = PlanNode.withCityNameAndPlaceName("北京", "启迪科技大厦");
+        String[] addressNodes = current.getAddress().split("\\.");
+        PlanNode enNode = PlanNode.withCityNameAndPlaceName("北京",
+                addressNodes[addressNodes.length - 1]);
 
-        if (LatLng_start != null)
-            Toast.makeText(MapActivity.this, "起点坐标：" + LatLng_start.latitude, Toast.LENGTH_SHORT).show();
-//            System.out.println();
-        else
-            Toast.makeText(MapActivity.this, "起点异常！", Toast.LENGTH_SHORT).show();
-//            System.out.println("起点异常！");
         mSearch.bikingSearch((new BikingRoutePlanOption())
                 .from(stNode).to(enNode));
+
+        Snackbar.make(container, getResources().getString(R.string.snackbar_address,
+                addressNodes[addressNodes.length - 1]), Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show();
     }
 
     /**
-     * 节点浏览示例
+     * 节点浏览
      *
      * @param v
      */
@@ -210,13 +367,14 @@ public class MapActivity extends SwipeBackActivity implements BaiduMap.OnMapClic
         }
         // 移动节点至中心
         mBaidumap.setMapStatus(MapStatusUpdateFactory.newLatLng(nodeLocation));
-        // show popup
-        popupText = new TextView(MapActivity.this);
-        popupText.setBackgroundResource(R.drawable.popup);
-        popupText.setTextColor(0xFF000000);
-        popupText.setText(nodeTitle);
-        popupText.setPadding(32,24,32,24);
-        mBaidumap.showInfoWindow(new InfoWindow(popupText, nodeLocation, 0));
+        Snackbar.make(container, nodeTitle, Snackbar.LENGTH_INDEFINITE).show();
+//        // show popup
+//        popupText = new TextView(MapActivity.this);
+//        popupText.setBackgroundResource(R.drawable.popup);
+//        popupText.setTextColor(0xFF000000);
+//        popupText.setText(nodeTitle);
+//        popupText.setPadding(32,24,32,24);
+//        mBaidumap.showInfoWindow(new InfoWindow(popupText, nodeLocation, 0));
 
     }
 
@@ -470,6 +628,7 @@ public class MapActivity extends SwipeBackActivity implements BaiduMap.OnMapClic
     protected void onDestroy() {
         mSearch.destroy();
         mMapView.onDestroy();
+        mLocClient.stop();
         super.onDestroy();
     }
 
@@ -492,17 +651,17 @@ public class MapActivity extends SwipeBackActivity implements BaiduMap.OnMapClic
                     .longitude(location.getLongitude()).build();
             mBaidumap.setMyLocationData(locData);
 
+            currentLocation = new LatLng(location.getLatitude(),
+                    location.getLongitude());
 
             if (isFirstLoc) {
                 isFirstLoc = false;
                 LatLng ll = new LatLng(location.getLatitude(),
                         location.getLongitude());
-                MapStatus.Builder builder = new MapStatus.Builder();
-                builder.target(ll).zoom(18.0f);
-                mBaidumap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
                 LatLng_start = new LatLng(location.getLatitude(),
                         location.getLongitude());
                 searchButtonProcess();
+                zoomToPoint(ll);
             }
         }
 
@@ -510,5 +669,43 @@ public class MapActivity extends SwipeBackActivity implements BaiduMap.OnMapClic
         }
     }
 
+    private void zoomToPoint(LatLng ll) {
+
+//        MyLocationConfiguration.LocationMode mCurrentMode = MyLocationConfiguration.LocationMode.COMPASS;
+//
+//        mBaidumap
+//                .setMyLocationConfigeration(new MyLocationConfiguration(
+//                        mCurrentMode, true, null));
+
+        if (ll != null) {
+            MapStatus.Builder builder = new MapStatus.Builder();
+            builder.target(ll).zoom(18.0f);
+            mBaidumap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
+        }
+
+//        mCurrentMode = MyLocationConfiguration.LocationMode.NORMAL;
+//        mBaidumap
+//                .setMyLocationConfigeration(new MyLocationConfiguration(
+//                        mCurrentMode, true, null));
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        overridePendingTransition(R.anim.move_left_in_activity, R.anim.move_right_out_activity);
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                overridePendingTransition(R.anim.move_left_in_activity, R.anim.move_right_out_activity);
+                break;
+        }
+        return true;
+    }
 }
 

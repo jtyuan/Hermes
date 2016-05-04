@@ -20,7 +20,7 @@ public class User implements Serializable {
         this.userName = name;
         this.userPhoneNum = phone;
         this.userEmail = email;
-        this.userGender = "先生";
+        this.userGender = "女士";
         this.userVIPRank = 0;
     }
 

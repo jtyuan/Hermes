@@ -1,5 +1,7 @@
 package edu.sei.eecs.pku.hermes.model;
 
+import android.util.Log;
+
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -11,6 +13,7 @@ import java.util.Locale;
 public class Order implements Serializable, Comparable {
 
     private static final long serialVersionUID = 3998467362700630317L;
+    private static final SimpleDateFormat sdf_datetime = new SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.CHINA);
     private static final SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.CHINA);
     public static final int BEGIN = 0;
     public static final int END = 1;
@@ -28,6 +31,7 @@ public class Order implements Serializable, Comparable {
     private long arriveTime;
     private long waitTime;
     private long leaveTime;
+    private long realTime;
 
     private Failure failure;
 
@@ -51,6 +55,14 @@ public class Order implements Serializable, Comparable {
 
     public Order (String id, String address, long reserveBegin, long reserveEnd) {
         this(id, new User("0", "姓名", "电话", "邮箱"), address, reserveBegin, reserveEnd);
+    }
+
+    public long getRealTime() {
+        return realTime;
+    }
+
+    public void setRealTime(long realTime) {
+        this.realTime = realTime;
     }
 
     public String getOrderId() {
@@ -216,7 +228,8 @@ public class Order implements Serializable, Comparable {
         return arriveTime;
     }
 
-    public void setArriveTime(int arriveTime) {
+    public void setArriveTime(long at) {
+        int arriveTime = (int)at;
         this.arriveTime = arriveTime;
 
         int hour = arriveTime / 3600;
@@ -233,7 +246,7 @@ public class Order implements Serializable, Comparable {
         return waitTime;
     }
 
-    public void setWaitTime(int waitTime) {
+    public void setWaitTime(long waitTime) {
         this.waitTime = waitTime;
     }
 
@@ -241,12 +254,18 @@ public class Order implements Serializable, Comparable {
         return leaveTime;
     }
 
-    public void setLeaveTime(int leaveTime) {
+    public void setLeaveTime(long leaveTime) {
         this.leaveTime = leaveTime;
     }
 
     @Override
     public int compareTo(Object another) {
         return 0;
+    }
+
+    public String getFormatRealTime() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(realTime * 1000);
+        return sdf_datetime.format(calendar.getTime());
     }
 }

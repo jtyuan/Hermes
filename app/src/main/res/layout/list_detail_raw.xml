@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <TextView
@@ -9,11 +10,12 @@
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:text="@string/order_id"
         android:id="@+id/tvOrderIdTitle"
+        android:textColor="@color/textColorPrimary"
         android:layout_marginLeft="16dp"
         android:layout_marginStart="16dp"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"/>
+        android:layout_alignParentStart="true" />
 
 
     <TextView
@@ -21,6 +23,7 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:text="1251763094451085"
+        android:textColor="@color/textColorPrimary"
         android:id="@+id/tvOrderId"
         android:layout_alignTop="@+id/tvOrderIdTitle"
         android:layout_toRightOf="@+id/tvOrderIdTitle"
@@ -31,13 +34,14 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:text="@string/contacts"
+        android:textColor="@color/textColorPrimary"
         android:id="@+id/tvContactsTitle"
         android:layout_marginTop="8dp"
         android:layout_marginLeft="16dp"
         android:layout_marginStart="16dp"
         android:layout_below="@+id/tvOrderId"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"/>
+        android:layout_alignParentStart="true" />
 
 
     <TextView
@@ -46,6 +50,7 @@
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:text="江天源"
         android:id="@+id/tvName"
+        android:textColor="@color/textColorPrimary"
         android:layout_alignTop="@+id/tvContactsTitle"
         android:layout_toRightOf="@+id/tvContactsTitle"
         android:layout_toEndOf="@+id/tvContactsTitle" />
@@ -56,17 +61,19 @@
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:text="@string/address"
         android:id="@+id/tvAddressTitle"
+        android:textColor="@color/textColorPrimary"
         android:layout_marginTop="8dp"
         android:layout_marginLeft="16dp"
         android:layout_marginStart="16dp"
         android:layout_below="@+id/tvName"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"/>
+        android:layout_alignParentStart="true" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="@color/textColorPrimary"
         android:text="北京市 海淀区 颐和园路5号 燕园街道 北京大学理科一号楼1616"
         android:id="@+id/tvAddress"
         android:layout_marginEnd="16dp"
@@ -81,18 +88,20 @@
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:text="@string/reservation"
         android:id="@+id/tvReservationTitle"
+        android:textColor="@color/textColorPrimary"
         android:layout_marginTop="8dp"
         android:layout_marginLeft="16dp"
         android:layout_marginStart="16dp"
         android:layout_below="@+id/tvAddress"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"/>
+        android:layout_alignParentStart="true" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:text="09:00"
+        android:textColor="@color/textColorPrimary"
         android:id="@+id/tvRes1"
         android:layout_alignTop="@+id/tvReservationTitle"
         android:layout_toRightOf="@+id/tvReservationTitle"
@@ -105,6 +114,7 @@
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:text="  -  "
         android:id="@+id/textView"
+        android:textColor="@color/textColorPrimary"
         android:layout_toRightOf="@+id/tvRes1"
         android:layout_toEndOf="@+id/tvRes1"
         android:layout_alignTop="@+id/tvRes1" />
@@ -114,6 +124,7 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:text="09:30"
+        android:textColor="@color/textColorPrimary"
         android:id="@+id/tvRes2"
         android:layout_alignTop="@+id/textView"
         android:layout_toRightOf="@+id/textView"
@@ -125,6 +136,7 @@
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:text="@string/gender"
         android:id="@+id/tvGender"
+        android:textColor="@color/textColorPrimary"
         android:layout_marginLeft="6sp"
         android:layout_marginStart="6sp"
         android:layout_alignTop="@+id/tvName"
@@ -136,10 +148,38 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:text="@string/phone"
+        android:textColor="@color/textColorPrimary"
         android:id="@+id/tvPhone"
         android:layout_marginLeft="6sp"
         android:layout_marginStart="6sp"
         android:layout_alignTop="@+id/tvGender"
         android:layout_toRightOf="@+id/tvGender"
         android:layout_toEndOf="@+id/tvGender" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Medium Text"
+        android:id="@+id/tvFailedTitle"
+        android:layout_below="@+id/tvReservationTitle"
+        android:textColor="@color/textColorPrimary"
+        android:layout_marginTop="8dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:visibility="gone"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Small Text"
+        android:id="@+id/tvFailed"
+        android:textColor="@color/textColorPrimary"
+        android:layout_alignTop="@+id/tvFailedTitle"
+        android:layout_toRightOf="@+id/tvFailedTitle"
+        android:layout_toEndOf="@+id/tvFailedTitle"
+        android:visibility="gone"/>
 </RelativeLayout>

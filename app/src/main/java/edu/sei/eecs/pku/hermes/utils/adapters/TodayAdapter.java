@@ -10,6 +10,7 @@ import android.widget.TextView;
 import java.util.List;
 
 import edu.sei.eecs.pku.hermes.R;
+import edu.sei.eecs.pku.hermes.configs.Constants;
 import edu.sei.eecs.pku.hermes.model.Order;
 
 /**
@@ -71,11 +72,14 @@ public class TodayAdapter extends ArrayAdapter<Order> {
             String name = order.getRecipientName();
             String phone = order.getRecipientPhone();
             String address = order.getAddress();
-            this.tvOrderId.setText(id);
+            if (order.getState() == Constants.STATUS_FAILED) {
+                this.tvOrderId.setText(String.format("%s (配送失败)", id));
+            } else {
+                this.tvOrderId.setText(id);
+            }
             this.tvRecipient.setText(name);
             this.tvPhoneNum.setText(phone);
             this.tvAddress.setText(address);
-
         }
 
     }

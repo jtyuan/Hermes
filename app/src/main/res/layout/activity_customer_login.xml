@@ -10,8 +10,8 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    android:background="@color/windowBackground"
-    tools:context="edu.sei.eecs.pku.hermes.LoginActivity">
+    tools:context="edu.sei.eecs.pku.hermes.CustomerLoginActivity"
+    android:background="@color/activityBackground">
 
     <LinearLayout
         android:id="@+id/llHeaderProgress"
@@ -27,7 +27,6 @@
             app:mlpb_arrow_height="5dp"
             app:mlpb_arrow_width="10dp"
             app:mlpb_progress_stoke_width="5dp"
-            app:mlpb_progress_color="@color/colorPrimary"
             android:layout_width="60dp"
             android:layout_height="60dp" />
     </LinearLayout>
@@ -51,7 +50,7 @@
                 android:id="@+id/app_icon"
                 android:layout_width="128dp"
                 android:layout_height="128dp"
-                android:src="@drawable/icon"
+                android:src="@drawable/icon_user"
                 app:civ_border_width="2dp"
                 app:civ_border_color="#FF000000" />
 
@@ -67,34 +66,16 @@
                     android:layout_height="wrap_content">
 
                     <AutoCompleteTextView
-                        android:id="@+id/email"
+                        android:id="@+id/phone"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/prompt_email"
-                        android:inputType="textEmailAddress"
+                        android:hint="@string/prompt_phone"
+                        android:inputType="text"
                         android:maxLines="1"
                         android:singleLine="true" />
 
                 </android.support.design.widget.TextInputLayout>
 
-                <android.support.design.widget.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                    <EditText
-                        android:id="@+id/password"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="@string/prompt_password"
-                        android:imeActionId="@+id/login"
-                        android:imeActionLabel="@string/action_sign_in_short"
-                        android:imeOptions="actionUnspecified"
-                        android:textColor="@android:color/white"
-                        android:inputType="textPassword"
-                        android:maxLines="1"
-                        android:singleLine="true" />
-
-                </android.support.design.widget.TextInputLayout>
 
                 <info.hoang8f.widget.FButton
                     fbutton:buttonColor="@color/colorPrimary"
@@ -102,7 +83,7 @@
                     fbutton:shadowEnabled="true"
                     fbutton:shadowHeight="5dp"
                     fbutton:cornerRadius="5dp"
-                    android:id="@+id/email_sign_in_button"
+                    android:id="@+id/sign_in_button"
                     style="?android:textAppearanceSmall"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -110,17 +91,6 @@
                     android:text="@string/action_sign_in_short"
                     android:textColor="#ffffff"
                     android:textStyle="bold" />
-
-                <Button
-                    style="@style/ButtonBorderless"
-                    android:background="?android:attr/selectableItemBackground"
-                    android:layout_width="match_parent"
-                    android:paddingTop="8sp"
-                    android:layout_height="32sp"
-                    android:text="@string/other_user"
-                    android:textColor="@android:color/holo_blue_light"
-                    android:id="@+id/normal_user_button"
-                    android:layout_marginTop="8dp" />
             </LinearLayout>
         </RelativeLayout>
     </ScrollView>

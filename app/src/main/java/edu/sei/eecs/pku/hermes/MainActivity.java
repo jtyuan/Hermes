@@ -36,16 +36,13 @@ public class MainActivity extends AppCompatActivity {
 //        setSupportActionBar(toolbar);
 //        JPushInterface.init(getApplicationContext());
 
-
-        SDKInitializer.initialize(getApplicationContext());
-
         this.startService(new Intent(this, PushService.class));
         PushService_.intent(getApplication()).start();
 
 //        MapActivity_.intent(MainActivity.this).start();
-        // TODO: change to login activity
 //        TodayActivity_.intent(MainActivity.this).start();
         LoginActivity_.intent(MainActivity.this).start();
+//        HomeActivity_.intent(MainActivity.this).start();
 //        PlanResultActivity_.intent(MainActivity.this).start();
         finish();
     }

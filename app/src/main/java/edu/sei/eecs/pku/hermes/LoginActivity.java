@@ -70,6 +70,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private static final String[] DUMMY_CREDENTIALS = new String[]{
             "jty2005@qq.com:635241"
     };
+
+
+    public static LoginActivity instance;
+
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
@@ -102,11 +106,18 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         attemptLogin();
     }
 
+    @Click
+    void normal_user_button() {
+        CustomerLoginActivity_.intent(LoginActivity.this).start();
+        overridePendingTransition(R.anim.move_right_in_activity, R.anim.move_left_out_activity);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 //        setContentView(R.layout.activity_login);
 //        init();
+        instance = this;
         loginInfo = getSharedPreferences("login", MODE_PRIVATE);
         queue = HttpClientRequest.getInstance(this.getApplicationContext()).getRequestQueue();
     }
@@ -130,19 +141,29 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         });
         mProgressView.setColorSchemeResources(R.color.colorPrimary);
         boolean isLogged = loginInfo.getBoolean("isLogged", false);
+        boolean isCourier = loginInfo.getBoolean("isCourier", true);
         String username = loginInfo.getString("courier_id", "");
         mUsernameView.setText(username);
 
+        if (username.length() > 0) {
+            mPasswordView.requestFocus();
+        }
+
         if (isLogged) {
+            if (isCourier) {
+                String refresh_token = loginInfo.getString("refresh_token", "default");
 
-            String refresh_token = loginInfo.getString("refresh_token", "default");
+                long expires_by = loginInfo.getLong("expires_by", 0);
+                if (System.currentTimeMillis() / 1000 < expires_by) {
 
-            long expires_by = loginInfo.getLong("expires_by", 0);
-            if (System.currentTimeMillis()/1000 < expires_by) {
-
-                relogin(username, refresh_token);
+                    relogin(username, refresh_token);
+                } else {
+                    Toast.makeText(LoginActivity.this, "长期未使用，请重新登录", Toast.LENGTH_SHORT).show();
+                }
             } else {
-                Toast.makeText(LoginActivity.this, "长期未使用，请重新登录", Toast.LENGTH_SHORT).show();
+                TodayActivity_.intent(LoginActivity.this).start();
+                overridePendingTransition(R.anim.move_right_in_activity, R.anim.move_left_out_activity);
+                finish();
             }
         }
     }

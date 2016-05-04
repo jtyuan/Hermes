@@ -1,5 +1,7 @@
 package edu.sei.eecs.pku.hermes;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -30,6 +32,7 @@ import android.widget.Toast;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.baidu.mapapi.map.Text;
 import com.lsjwzh.widget.materialloadingprogressbar.CircleProgressBar;
 import com.orhanobut.dialogplus.DialogPlus;
 import com.orhanobut.dialogplus.Holder;
@@ -50,7 +53,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 import edu.sei.eecs.pku.hermes.configs.Constants;
 import edu.sei.eecs.pku.hermes.model.Failure;
@@ -64,10 +70,11 @@ import edu.sei.eecs.pku.hermes.utils.network.OrderListGson;
 import edu.sei.eecs.pku.hermes.utils.network.ResultGson;
 
 @EActivity(R.layout.activity_plan_result)
-public class PlanResultActivity extends AppCompatActivity {
+public class PlanResultActivity extends AppCompatActivity implements View.OnClickListener, Comparator<Order> {
     public static boolean isForeground = false;
 
     private SharedPreferences scheduleInfo;
+    private SharedPreferences loginInfo;
     private long lastSchedule;
 
     private RequestQueue queue;
@@ -81,6 +88,8 @@ public class PlanResultActivity extends AppCompatActivity {
     ArrayList<Order> completedOrders;
 
     ArrayList<User> users;
+
+    List<TextView> currentCard;
 
     Order current;
 
@@ -134,38 +143,93 @@ public class PlanResultActivity extends AppCompatActivity {
 
     ResideMenu resideMenu;
 
+    private boolean isCourier = false;
+    private ResideMenuItem itemHome;
+    private ResideMenuItem itemToday;
+    private ResideMenuItem itemHistory;
+    private ResideMenuItem itemLogout;
+    private ResideMenuItem itemMyList;
+    private TodayAdapter adapter_wait;
+    private TodayAdapter adapter_uninformed;
+    private FailureAdapter adapter_failure;
+
     @Click
     void buttonDone() {
 
-        GsonRequest gsonRequest = new GsonRequest.RequestBuilder()
-                .post()
-                .url(Constants.BASE_URL + "/delivery/" + readyOrders.get(0).getOrderId())
-                .addParams("real_time", String.valueOf(getCurrentTimeInSecond()))
-                .addParams("type", "0")
-                .addParams("message", "success")
-                .clazz(ResultGson.class)
-                .successListener(new Response.Listener() {
+        Holder holder = new ViewHolder(R.layout.dialog_done);
+
+        View headerView = View.inflate(PlanResultActivity.this, R.layout.detail_dialog_header, null);
+        View footerView = View.inflate(PlanResultActivity.this, R.layout.detail_dialog_footer_one_button, null);
+
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.CHINA);
+
+        ((TextView)headerView.findViewById(R.id.tvHeaderTitle)).setText(R.string.detail_header_title);
+        ((TextView)headerView.findViewById(R.id.tvHeaderSub)).setText("配送成功");
+//        (footerView.findViewById(R.id.tvFooterTitle)).setVisibility(View.INVISIBLE);
+        ((TextView)footerView.findViewById(R.id.tvFooterTitle)).setText(getResources()
+                .getString(R.string.dialog_done_time, sdf.format(calendar.getTime())));
+
+        DialogPlus dialog = DialogPlus.newDialog(PlanResultActivity.this)
+                .setContentHolder(holder)
+                .setHeader(headerView)
+                .setFooter(footerView)
+                .setGravity(Gravity.CENTER)
+                .setCancelable(true)
+                .setOnClickListener(new OnClickListener() {
                     @Override
-                    public void onResponse(Object response) {
-                        if (((ResultGson)response).status.equals("ok")) {
-                            Log.d("response", ((ResultGson)response).status);
-                            completedOrders.add(readyOrders.get(0));
-                            readyOrders.remove(0);
-                            refreshList();
+                    public void onClick(DialogPlus dialog, View view) {
+                        switch (view.getId()) {
+                            case R.id.footer_confirm_button:
+                                showProgress(true);
+                                GsonRequest gsonRequest = new GsonRequest.RequestBuilder()
+//                .post()
+                                        .url(Constants.BASE_URL)
+                                        .addParams("delivery", readyOrders.get(0).getOrderId())
+                                        .addParams("inform", String.valueOf(Constants.STATUS_COMPLETED))
+                                        .clazz(ResultGson.class)
+                                        .successListener(new Response.Listener() {
+                                            @Override
+                                            public void onResponse(Object response) {
+                                                if (((ResultGson) response).status.equals("ok")) {
+                                                    completedOrders.add(readyOrders.get(0));
+                                                    readyOrders.remove(0);
+                                                    if (uninformedOrders.size() > 0) {
+                                                        readyOrders.add(uninformedOrders.get(0));
+                                                        uninformedOrders.remove(0);
+                                                    }
+                                                    refreshList();
+                                                    showProgress(false);
+                                                }
+                                            }
+                                        })
+                                        .errorListener(new Response.ErrorListener() {
+                                            @Override
+                                            public void onErrorResponse(VolleyError error) {
+                                                Toast.makeText(PlanResultActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
+                                                showProgress(false);
+                                            }
+                                        })
+                                        .build();
+                                queue.add(gsonRequest);
+                                dialog.dismiss();
+                                break;
                         }
                     }
                 })
-                .errorListener(new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(PlanResultActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
-                    }
-                })
-                .build();
-        queue.add(gsonRequest);
+                .create();
 
+        View holderView = dialog.getHolderView();
 
+        ((TextView)holderView.findViewById(R.id.tvConfirm)).setText(getResources()
+                .getString(R.string.dialog_done_confirm, current.getRecipientName()));
+//
+//        Calendar calendar = Calendar.getInstance();
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.CHINA);
+//        ((TextView)holderView.findViewById(R.id.tvCurrentTime)).setText(getResources()
+//                .getString(R.string.dialog_done_time, sdf.format(calendar.getTime())));
 
+        dialog.show();
     }
 
     @Click
@@ -179,7 +243,7 @@ public class PlanResultActivity extends AppCompatActivity {
 //        list.add(PlanResultActivity.this.getString(R.string.failed_reason_5));
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(PlanResultActivity.this,
-                android.R.layout.simple_spinner_dropdown_item, list);
+                R.layout.spinner_item, list);
 
         Holder holder = new ViewHolder(R.layout.dialog_failed);
 
@@ -206,11 +270,10 @@ public class PlanResultActivity extends AppCompatActivity {
                             case R.id.footer_confirm_button:
 
                                 GsonRequest gsonRequest = new GsonRequest.RequestBuilder()
-                                        .post()
-                                        .url(Constants.BASE_URL + "/delivery/" + readyOrders.get(0).getOrderId())
-                                        .addParams("real_time", String.valueOf(getCurrentTimeInSecond()))
-                                        .addParams("type", "1")
-                                        .addParams("message", tvFailure.getText().toString())
+//                                        .post()
+                                        .url(Constants.BASE_URL)
+                                        .addParams("delivery", readyOrders.get(0).getOrderId())
+                                        .addParams("inform", tvFailure.getText().toString())
                                         .clazz(ResultGson.class)
                                         .successListener(new Response.Listener() {
                                             @Override
@@ -231,8 +294,6 @@ public class PlanResultActivity extends AppCompatActivity {
                                         })
                                         .build();
                                 queue.add(gsonRequest);
-
-
 
                                 dialog.dismiss();
                                 break;
@@ -294,11 +355,17 @@ public class PlanResultActivity extends AppCompatActivity {
         View holderView = dialog.getHolderView();
         ((TextView)holderView.findViewById(R.id.tvOrderId)).setText(clickItem.getOrderId());
         ((TextView)holderView.findViewById(R.id.tvName)).setText(clickItem.getRecipientName());
-        ((TextView)holderView.findViewById(R.id.tvGender)).setText("先生");
+//        if (Math.random() >= 0.5) {
+//            ((TextView) holderView.findViewById(R.id.tvGender)).setText("女士");
+//        } else {
+//            ((TextView) holderView.findViewById(R.id.tvGender)).setText("先生");
+//        }
+        ((TextView) holderView.findViewById(R.id.tvGender)).setText(""); // no gender data
         ((TextView)holderView.findViewById(R.id.tvPhone)).setText(clickItem.getRecipientPhone());
         ((TextView)holderView.findViewById(R.id.tvAddress)).setText(clickItem.getAddress());
         ((TextView)holderView.findViewById(R.id.tvRes1)).setText(clickItem.getReserveBegin());
         ((TextView)holderView.findViewById(R.id.tvRes2)).setText(clickItem.getReserveEnd());
+        ((TextView)holderView.findViewById(R.id.tvEstimation)).setText(clickItem.getEstimation());
 
         dialog.show();
     }
@@ -336,7 +403,12 @@ public class PlanResultActivity extends AppCompatActivity {
         View holderView = dialog.getHolderView();
         ((TextView)holderView.findViewById(R.id.tvOrderId)).setText(clickItem.getOrderId());
         ((TextView)holderView.findViewById(R.id.tvName)).setText(clickItem.getRecipientName());
-        ((TextView)holderView.findViewById(R.id.tvGender)).setText("先生"); // TODO
+//        if (Math.random() >= 0.5) {
+//            ((TextView) holderView.findViewById(R.id.tvGender)).setText("女士");
+//        } else {
+//            ((TextView) holderView.findViewById(R.id.tvGender)).setText("先生");
+//        }
+        ((TextView) holderView.findViewById(R.id.tvGender)).setText(""); // no gender data
         ((TextView)holderView.findViewById(R.id.tvPhone)).setText(clickItem.getRecipientPhone());
         ((TextView)holderView.findViewById(R.id.tvAddress)).setText(clickItem.getAddress());
         ((TextView)holderView.findViewById(R.id.tvRes1)).setText(clickItem.getReserveBegin());
@@ -379,10 +451,15 @@ public class PlanResultActivity extends AppCompatActivity {
 
         ((TextView)holderView.findViewById(R.id.tvOrderId)).setText(clickItem.getOrderId());
         ((TextView)holderView.findViewById(R.id.tvName)).setText(clickItem.getRecipientName());
-        ((TextView)holderView.findViewById(R.id.tvGender)).setText("先生");
+//        if (Math.random() >= 0.5) {
+//            ((TextView) holderView.findViewById(R.id.tvGender)).setText("女士");
+//        } else {
+//            ((TextView) holderView.findViewById(R.id.tvGender)).setText("先生");
+//        }
+        ((TextView) holderView.findViewById(R.id.tvGender)).setText(""); // no gender data
         ((TextView)holderView.findViewById(R.id.tvPhone)).setText(clickItem.getRecipientPhone());
         ((TextView)holderView.findViewById(R.id.tvAddress)).setText(clickItem.getAddress());
-        ((TextView)holderView.findViewById(R.id.tvReservationTitle)).setText("失败原因：");
+        ((TextView)holderView.findViewById(R.id.tvReservationTitle)).setText(R.string.failure_reason);
         ((TextView)holderView.findViewById(R.id.tvRes1)).setText(clickItem.getFailure());
 
         (holderView.findViewById(R.id.tvRes2)).setVisibility(View.INVISIBLE);
@@ -399,6 +476,8 @@ public class PlanResultActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             // Show the Up button in the action bar.
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
+            getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_drawer);
         }
     }
 
@@ -431,6 +510,9 @@ public class PlanResultActivity extends AppCompatActivity {
                 startActivity(intent);
                 overridePendingTransition(R.anim.move_right_in_activity, R.anim.move_left_out_activity);
                 return true;
+            case android.R.id.home:
+                resideMenu.openMenu(ResideMenu.DIRECTION_LEFT);
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -443,47 +525,47 @@ public class PlanResultActivity extends AppCompatActivity {
     void init() {
 
 
+        progressBar.setColorSchemeResources(R.color.colorPrimary);
+
+
+        setupActionBar();
         // Reside Menu Initialization
         // attach to current activity;
-        resideMenu = new ResideMenu(this);
-        resideMenu.setBackground(R.drawable.menu_background);
-        resideMenu.attachToActivity(this);
-        resideMenu.setSwipeDirectionDisable(ResideMenu.DIRECTION_RIGHT);
-
-        // create menu items;
-        String titles[] = { "Home", "Profile", "Calendar", "Settings" };
-        int icon[] = { android.R.drawable.ic_menu_agenda, android.R.drawable.ic_menu_zoom, android.R.drawable.ic_menu_agenda, android.R.drawable.ic_menu_agenda };
-
-        for (int i = 0; i < titles.length; i++){
-            ResideMenuItem item = new ResideMenuItem(this, icon[i], titles[i]);
-//            item.setOnClickListener(this);
-            resideMenu.addMenuItem(item,  ResideMenu.DIRECTION_LEFT); // or  ResideMenu.DIRECTION_RIGHT
-        }
-
+        initResideMenu();
+        registerMessageReceiver();
 
         orders = new ArrayList<>();
         readyOrders = new ArrayList<>();
         uninformedOrders = new ArrayList<>();
         failedOrders = new ArrayList<>();
         completedOrders = new ArrayList<>();
+        currentCard = new ArrayList<>();
 
         users = new ArrayList<>();
 
         // Get a Request Queue
         queue = HttpClientRequest.getInstance(this.getApplicationContext()).getRequestQueue();
 
-        registerMessageReceiver();
 
         CardView cardView = (CardView) findViewById(R.id.card_view);
 
-//        setupActionBar();
+        currentCard.add(tvCurrent);
+        currentCard.add(tvAddress);
+        currentCard.add(tvArriveTime);
+        currentCard.add(tvEwt);
+        currentCard.add(tvName);
+        currentCard.add(tvOrderId);
 
         if (waitingList != null && uninformedList != null && failedList != null) {
 
             cardView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    MapActivity_.intent(PlanResultActivity.this).start();
+                    Intent intent = new Intent(PlanResultActivity.this, MapActivity_.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putSerializable("current", current);
+                    intent.putExtras(bundle);
+                    startActivity(intent);
                     overridePendingTransition(R.anim.move_right_in_activity, R.anim.move_left_out_activity);
                 }
             });
@@ -491,22 +573,103 @@ public class PlanResultActivity extends AppCompatActivity {
             pullToRefreshView.setOnRefreshListener(new PullToRefreshView.OnRefreshListener() {
                 @Override
                 public void onRefresh() {
-                    Toast.makeText(PlanResultActivity.this, "pulled!", Toast.LENGTH_SHORT).show();
-                    pullToRefreshView.setRefreshing(false);
+                    Log.d("schedule", "refreshing list");
+                    showProgress(true);
+                    Toast.makeText(PlanResultActivity.this, "正在刷新...", Toast.LENGTH_SHORT).show();
+                    GsonRequest gsonRequest = new GsonRequest.RequestBuilder()
+//                    .post()
+                            .url(Constants.BASE_URL)
+                            .addParams("courier", InitApplication.courier_id)
+                            .addParams("task", getDateString())
+                            .addParams("lazy", "") // lazy mode, fetch order list without rescheduling
+                            .clazz(OrderListGson.class)
+                            .successListener(new Response.Listener() {
+                                @Override
+                                public void onResponse(Object response) {
+                                    showProgress(false);
+                                    orders.clear();
+                                    readyOrders.clear();
+                                    uninformedOrders.clear();
+                                    completedOrders.clear();
+                                    failedOrders.clear();
+                                    orders.addAll(Arrays.asList(((OrderListGson) response).getOrders()));
+                                    Collections.sort(orders, PlanResultActivity.this);
+                                    for (Order order : orders) {
+                                        switch (order.getState()) {
+                                            case Constants.STATUS_READY:
+                                                readyOrders.add(order);
+//                                        Toast.makeText(PlanResultActivity.this, order.getAddress(), Toast.LENGTH_SHORT).show();
+                                                break;
+                                            case Constants.STATUS_UNINFORMED:
+                                                uninformedOrders.add(order);
+                                                break;
+                                            case Constants.STATUS_COMPLETED:
+                                                completedOrders.add(order);
+                                                break;
+                                            case Constants.STATUS_FAILED:
+                                                failedOrders.add(order);
+                                                break;
+                                        }
+                                    }
+
+                                    refreshList();
+
+                                    pullToRefreshView.setRefreshing(false);
+                                    Toast.makeText(PlanResultActivity.this, "刷新完毕", Toast.LENGTH_SHORT).show();
+                                }
+                            })
+                            .errorListener(new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    Toast.makeText(PlanResultActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
+                                }
+                            })
+                            .build();
+                    queue.add(gsonRequest);
                 }
             });
-
-
-            progressBar.setColorSchemeResources(R.color.colorPrimary);
-
 
             schedule();
         }
     }
 
+    private void initResideMenu() {
+        resideMenu = new ResideMenu(this);
+        resideMenu.setBackground(R.drawable.menu_background);
+        resideMenu.attachToActivity(this);
+        resideMenu.setSwipeDirectionDisable(ResideMenu.DIRECTION_RIGHT);
+
+        itemHome     = new ResideMenuItem(this, R.drawable.ic_menu_home,     "主页");
+        itemToday    = new ResideMenuItem(this, android.R.drawable.ic_menu_today,  "今日配送");
+        itemHistory  = new ResideMenuItem(this, android.R.drawable.ic_menu_recent_history, "配送历史");
+        itemLogout   = new ResideMenuItem(this, android.R.drawable.ic_menu_close_clear_cancel, "登出");
+        itemMyList   = new ResideMenuItem(this, android.R.drawable.ic_menu_my_calendar, "我的订单");
+
+        itemHome.setOnClickListener(this);
+        itemToday.setOnClickListener(this);
+        itemHistory.setOnClickListener(this);
+        itemLogout.setOnClickListener(this);
+        itemMyList.setOnClickListener(this);
+
+        loginInfo = getSharedPreferences("login", MODE_PRIVATE);
+        isCourier = loginInfo.getBoolean("isCourier", false);
+
+        resideMenu.addMenuItem(itemHome, ResideMenu.DIRECTION_LEFT);
+
+        if (isCourier) {
+            resideMenu.addMenuItem(itemToday, ResideMenu.DIRECTION_LEFT);
+            resideMenu.addMenuItem(itemHistory, ResideMenu.DIRECTION_LEFT);
+        } else {
+            resideMenu.addMenuItem(itemMyList, ResideMenu.DIRECTION_LEFT);
+        }
+        resideMenu.addMenuItem(itemLogout, ResideMenu.DIRECTION_LEFT);
+    }
+
+
     private void schedule() {
         GsonRequest gsonRequest;
         if (lastSchedule + Constants.SCHEDULE_INTERVAL <= System.currentTimeMillis()) {
+            Log.d("schedule", "normal mode");
             gsonRequest = new GsonRequest.RequestBuilder()
 //                    .post()
                     .url(Constants.BASE_URL)
@@ -516,11 +679,14 @@ public class PlanResultActivity extends AppCompatActivity {
                     .successListener(new Response.Listener() {
                         @Override
                         public void onResponse(Object response) {
-                            llHeaderProgress.setVisibility(View.GONE);
-                            scrollView.setVisibility(View.VISIBLE);
+                            lastSchedule = System.currentTimeMillis();
+                            SharedPreferences.Editor editor = scheduleInfo.edit();
+                            editor.putLong("last_schedule", lastSchedule);
+                            editor.apply();
+                            showProgress(false);
                             orders.clear();
                             orders.addAll(Arrays.asList(((OrderListGson) response).getOrders()));
-                            orders.remove(0);
+                            Collections.sort(orders, PlanResultActivity.this);
                             for (Order order : orders) {
                                 switch (order.getState()) {
                                     case Constants.STATUS_READY:
@@ -548,7 +714,9 @@ public class PlanResultActivity extends AppCompatActivity {
                         }
                     })
                     .build();
+            queue.add(gsonRequest);
         } else {
+            Log.d("schedule", "lazy mode");
             gsonRequest = new GsonRequest.RequestBuilder()
 //                    .post()
                     .url(Constants.BASE_URL)
@@ -559,11 +727,10 @@ public class PlanResultActivity extends AppCompatActivity {
                     .successListener(new Response.Listener() {
                         @Override
                         public void onResponse(Object response) {
-                            llHeaderProgress.setVisibility(View.GONE);
-                            scrollView.setVisibility(View.VISIBLE);
+                            showProgress(false);
                             orders.clear();
                             orders.addAll(Arrays.asList(((OrderListGson) response).getOrders()));
-                            orders.remove(0);
+                            Collections.sort(orders, PlanResultActivity.this);
                             for (Order order : orders) {
                                 switch (order.getState()) {
                                     case Constants.STATUS_READY:
@@ -591,28 +758,60 @@ public class PlanResultActivity extends AppCompatActivity {
                         }
                     })
                     .build();
+            queue.add(gsonRequest);
         }
-        queue.add(gsonRequest);
     }
 
     private void refreshList() {
 
+
+        final int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+
+//        scrollView.setVisibility(View.GONE);
+//        scrollView.animate().setDuration(shortAnimTime).alpha(0.5f).setListener(new AnimatorListenerAdapter() {
+//            @Override
+//            public void onAnimationEnd(Animator animation) {
+//                scrollView.setVisibility(View.GONE);
+//            }
+//        });
+
+        scrollView.setVisibility(View.VISIBLE);
+        scrollView.animate().setDuration(shortAnimTime).alpha(1).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                scrollView.setVisibility(View.VISIBLE);
+            }
+        });
+
         if (readyOrders.size() > 0) {
             current = readyOrders.get(0);
-            tvCurrent.setText(getResources().getString(R.string.current_order,
-                    current.getVIPRank()));
+            tvCurrent.setText(getResources().getString(R.string.current_order));
             tvOrderId.setText(current.getOrderId());
-            tvName.setText(current.getRecipientName() + " 先生 " + current.getRecipientPhone());
+//            if (Math.random()>=0.5) {
+//                tvName.setText(current.getRecipientName() + " 女士 " + current.getRecipientPhone());
+//            } else {
+//                tvName.setText(current.getRecipientName() + " 先生 " + current.getRecipientPhone());
+//            }
+
+            Log.d("refresh", "arrive_time: " + current.getEstimation());
+            tvName.setText(String.format("%s %s", current.getRecipientName(), current.getRecipientPhone()));
             tvAddress.setText(current.getAddress());
             tvArriveTime.setText(current.getEstimation());
-            tvEwt.setText(String.valueOf(current.getWaitTime()) + " 分钟");
+            tvEwt.setText(String.format("%s 分钟", String.valueOf(current.getWaitTime())));
+
+
+
         } else {
             generateData();
             current = readyOrders.get(0);
-            tvCurrent.setText(getResources().getString(R.string.current_order,
-                    current.getVIPRank()));
+            tvCurrent.setText(getResources().getString(R.string.current_order));
             tvOrderId.setText(current.getOrderId());
-            tvName.setText(current.getRecipientName() + " 先生 " + current.getRecipientPhone());
+//            if (Math.random()>=0.5) {
+//                tvName.setText(current.getRecipientName() + " 女士 " + current.getRecipientPhone());
+//            } else {
+//                tvName.setText(current.getRecipientName() + " 先生 " + current.getRecipientPhone());
+//            }
+            tvName.setText(String.format("%s%s", current.getRecipientName(), current.getRecipientPhone()));
             tvAddress.setText(current.getAddress());
             tvArriveTime.setText(current.getEstimation());
         }
@@ -622,9 +821,9 @@ public class PlanResultActivity extends AppCompatActivity {
 //            readyOrders.add(emptyOrder);
 //        }
 //        Toast.makeText(PlanResultActivity.this, String.valueOf(readyOrders.size()), Toast.LENGTH_SHORT).show();
-        TodayAdapter adapter1 = new TodayAdapter(PlanResultActivity.this,
+        adapter_wait = new TodayAdapter(PlanResultActivity.this,
                 R.layout.list_item_today, readyOrders.subList(1, readyOrders.size()));
-        waitingList.setAdapter(adapter1);
+        waitingList.setAdapter(adapter_wait);
         if (readyOrders.size() > 1) {
             tvWaiting.setVisibility(View.VISIBLE);
             setListViewHeightBasedOnItems(waitingList);
@@ -632,9 +831,10 @@ public class PlanResultActivity extends AppCompatActivity {
             tvWaiting.setVisibility(View.INVISIBLE);
         }
 
-        TodayAdapter adapter2 = new TodayAdapter(PlanResultActivity.this,
+
+        adapter_uninformed = new TodayAdapter(PlanResultActivity.this,
                 R.layout.list_item_today, uninformedOrders);
-        uninformedList.setAdapter(adapter2);
+        uninformedList.setAdapter(adapter_uninformed);
         if (uninformedOrders.size() > 0) {
             tvUninformed.setVisibility(View.VISIBLE);
             setListViewHeightBasedOnItems(uninformedList);
@@ -642,15 +842,25 @@ public class PlanResultActivity extends AppCompatActivity {
             tvUninformed.setVisibility(View.INVISIBLE);
         }
 
-        FailureAdapter adapter3 = new FailureAdapter(PlanResultActivity.this,
+        adapter_failure = new FailureAdapter(PlanResultActivity.this,
                 R.layout.list_item_fail, failedOrders);
-        failedList.setAdapter(adapter3);
+        failedList.setAdapter(adapter_failure);
         if (failedOrders.size() > 0) {
             tvFailed.setVisibility(View.VISIBLE);
             setListViewHeightBasedOnItems(failedList);
         } else {
             tvFailed.setVisibility(View.INVISIBLE);
         }
+
+        // important - refresh views
+        Log.d("refresh", "start refreshing views");
+        Log.d("refresh", "Current Order: " + current.getOrderId());
+        for (TextView tv : currentCard) {
+            tv.postInvalidate();
+        }
+        adapter_wait.notifyDataSetChanged();
+        adapter_uninformed.notifyDataSetChanged();
+        adapter_failure.notifyDataSetChanged();
     }
 
 
@@ -773,6 +983,11 @@ public class PlanResultActivity extends AppCompatActivity {
         registerReceiver(mMessageReceiver, filter);
     }
 
+    @Override
+    public int compare(Order lhs, Order rhs) {
+        return (lhs.getArriveTime() - rhs.getArriveTime() >= 0) ? 1 : -1;
+    }
+
     public class MessageReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -784,5 +999,78 @@ public class PlanResultActivity extends AppCompatActivity {
     public static String getDateString() {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
         return dateFormat.format(Calendar.getInstance().getTime());
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (v == itemHome) {
+            resideMenu.closeMenu();
+            TodayActivity_.intent(PlanResultActivity.this).start();
+            overridePendingTransition(R.anim.move_right_in_activity, R.anim.move_left_out_activity);
+            finish();
+        } else if (v == itemToday) {
+            resideMenu.closeMenu();
+        } else if (v == itemHistory) {
+            resideMenu.closeMenu();
+            CompletedOrderActivity_.intent(PlanResultActivity.this).start();
+            overridePendingTransition(R.anim.move_right_in_activity, R.anim.move_left_out_activity);
+            finish();
+        } else if (v == itemMyList) {
+            resideMenu.closeMenu();
+
+        } else if (v == itemLogout) {
+            resideMenu.closeMenu();
+            SharedPreferences.Editor editor = loginInfo.edit();
+            editor.putBoolean("isLogged", false);
+            editor.putString("access_token", "");
+            editor.putString("refresh_token", "");
+            editor.putLong("expires_by", 0);
+            editor.apply();
+            LoginActivity_.intent(PlanResultActivity.this).start();
+            overridePendingTransition(R.anim.move_left_in_activity, R.anim.move_right_out_activity);
+            finish();
+        }
+    }
+
+    /**
+     * Shows the progress UI and hides the login form.
+     */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+    private void showProgress(final boolean show) {
+        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
+        // for very easy animations. If available, use these APIs to fade-in
+        // the progress spinner.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+
+//            scrollView.setVisibility(show ? View.GONE : View.VISIBLE);
+            scrollView.animate().setDuration(shortAnimTime).alpha(
+                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    scrollView.setVisibility(show ? View.GONE : View.VISIBLE);
+                }
+            });
+
+//            llHeaderProgress.setVisibility(show ? View.VISIBLE : View.GONE);
+            llHeaderProgress.animate().setDuration(shortAnimTime).alpha(
+                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    llHeaderProgress.setVisibility(show ? View.VISIBLE : View.GONE);
+                }
+            });
+        } else {
+            // The ViewPropertyAnimator APIs are not available, so simply show
+            // and hide the relevant UI components.
+            llHeaderProgress.setVisibility(show ? View.VISIBLE : View.GONE);
+            scrollView.setVisibility(show ? View.GONE : View.VISIBLE);
+        }
+    }
+
+
+    @Override
+    public void onBackPressed() {
+        moveTaskToBack(true);
     }
 }

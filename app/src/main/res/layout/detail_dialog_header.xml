@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    android:id="@+id/header_container"
+<LinearLayout android:id="@+id/header_container"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -15,7 +14,7 @@
         android:id="@+id/tvHeaderTitle"
         android:text="@string/detail_header_title"
         android:textColor="@android:color/black"
-        android:textSize="@dimen/header_text_size"/>
+        android:textSize="@dimen/header_text_size" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -23,6 +22,6 @@
         android:id="@+id/tvHeaderSub"
         android:text="@string/header_sub_title"
         android:textColor="@color/black_overlay"
-        android:textSize="@dimen/sample_text_size"/>
+        android:textSize="@dimen/sample_text_size" />
 
 </LinearLayout>

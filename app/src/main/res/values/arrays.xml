@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <integer-array name="toggle_theme">
+        <item>@color/colorPrimaryDark</item> <!-- really much darker color of main color -->
+        <item>@color/colorPrimaryDark</item> <!-- a bit darker color of your main color -->
+        <item>@color/colorPrimary</item> <!-- main color of your theme -->
+        <item>@color/colorLightPrimary</item> <!-- really much lighter color of main color -->
+    </integer-array>
+</resources>

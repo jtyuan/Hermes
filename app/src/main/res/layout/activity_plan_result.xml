@@ -5,26 +5,28 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/activityBackground"
     android:scrollbars="vertical"
     android:orientation="vertical"
+    android:background="@color/windowBackground"
     tools:context="edu.sei.eecs.pku.hermes.PlanResultActivity">
+
     <LinearLayout
         android:id="@+id/llHeaderProgress"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:gravity="center"
         android:orientation="vertical"
-        android:visibility="gone" >
+        android:visibility="visible">
 
 
         <com.lsjwzh.widget.materialloadingprogressbar.CircleProgressBar
             android:id="@+id/progressBar"
             app:mlpb_arrow_height="5dp"
             app:mlpb_arrow_width="10dp"
+            app:mlpb_progress_color="@color/colorPrimary"
             app:mlpb_progress_stoke_width="5dp"
             android:layout_width="60dp"
-            android:layout_height="60dp"/>
+            android:layout_height="60dp" />
     </LinearLayout>
 
     <com.yalantis.phoenix.PullToRefreshView
@@ -32,251 +34,269 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/scrollView"
-        android:visibility="gone">
-
-        <RelativeLayout
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <android.support.v7.widget.CardView
-                xmlns:card_view="http://schemas.android.com/apk/res-auto"
-                android:id="@+id/card_view"
-                android:layout_gravity="center"
+            android:layout_height="match_parent"
+            android:id="@+id/scrollView"
+            android:visibility="gone">
+
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@android:color/white"
-                card_view:cardCornerRadius="4dp">
+                android:layout_height="wrap_content">
+
+                <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+                    android:id="@+id/card_view"
+                    android:layout_gravity="center"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    card_view:cardBackgroundColor="@color/cardBackground"
+                    android:layout_marginTop="@dimen/activity_vertical_margin"
+                    android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                    android:layout_marginRight="@dimen/activity_horizontal_margin"
+                    card_view:cardCornerRadius="4dp">
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:paddingLeft="@dimen/activity_horizontal_margin"
+                        android:paddingRight="@dimen/activity_horizontal_margin"
+                        android:paddingTop="@dimen/activity_vertical_margin"
+                        android:paddingBottom="@dimen/activity_vertical_margin">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?android:attr/textAppearanceMedium"
+                            android:text="@string/current_order"
+                            android:id="@+id/tvCurrent"
+                            android:layout_alignParentTop="true"
+                            android:layout_centerHorizontal="true"
+                            android:textColor="@color/textColorPrimary" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?android:attr/textAppearanceSmall"
+                            android:text="@string/order_id"
+                            android:id="@+id/tvOrderIdTitle"
+                            android:layout_marginTop="8dp"
+                            android:layout_below="@+id/tvCurrent"
+                            android:layout_alignParentLeft="true"
+                            android:layout_alignParentStart="true"
+                            android:textColor="@color/textColorPrimary" />
+
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?android:attr/textAppearanceSmall"
+                            android:text="1251763094451085"
+                            android:id="@+id/tvOrderId"
+                            android:layout_alignTop="@+id/tvOrderIdTitle"
+                            android:layout_toRightOf="@+id/tvOrderIdTitle"
+                            android:layout_toEndOf="@+id/tvOrderIdTitle"
+                            android:textColor="@color/textColorPrimary" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?android:attr/textAppearanceSmall"
+                            android:text="@string/contacts"
+                            android:id="@+id/tvContactsTitle"
+                            android:layout_marginTop="8dp"
+                            android:textColor="@color/textColorPrimary"
+                            android:layout_below="@+id/tvOrderId"
+                            android:layout_alignParentLeft="true"
+                            android:layout_alignParentStart="true" />
+
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?android:attr/textAppearanceSmall"
+                            android:text="江天源 先生 15652240437"
+                            android:id="@+id/tvName"
+                            android:layout_alignTop="@+id/tvContactsTitle"
+                            android:layout_toRightOf="@+id/tvContactsTitle"
+                            android:layout_toEndOf="@+id/tvContactsTitle"
+                            android:textColor="@color/textColorPrimary" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?android:attr/textAppearanceSmall"
+                            android:text="@string/address"
+                            android:id="@+id/tvAddressTitle"
+                            android:layout_marginTop="8dp"
+                            android:layout_below="@+id/tvName"
+                            android:layout_alignParentLeft="true"
+                            android:layout_alignParentStart="true"
+                            android:textColor="@color/textColorPrimary" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?android:attr/textAppearanceSmall"
+                            android:text="北京市 海淀区 颐和园路5号 燕园街道 北京大学理科一号楼1616"
+                            android:id="@+id/tvAddress"
+                            android:layout_alignTop="@+id/tvAddressTitle"
+                            android:layout_toRightOf="@+id/tvAddressTitle"
+                            android:layout_toEndOf="@+id/tvAddressTitle"
+                            android:textColor="@color/textColorPrimary" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?android:attr/textAppearanceSmall"
+                            android:text="@string/estimation"
+                            android:id="@+id/tvReservationTitle"
+                            android:layout_marginTop="8dp"
+                            android:layout_below="@+id/tvAddress"
+                            android:layout_alignParentLeft="true"
+                            android:layout_alignParentStart="true"
+                            android:textColor="@color/textColorPrimary" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?android:attr/textAppearanceSmall"
+                            android:text="09:15"
+                            android:id="@+id/tvRes1"
+                            android:layout_alignTop="@+id/tvReservationTitle"
+                            android:layout_toRightOf="@+id/tvReservationTitle"
+                            android:layout_toEndOf="@+id/tvReservationTitle"
+                            android:textColor="@color/textColorPrimary" />
+
+
+                        <Button
+                            style="@style/ButtonBorderless"
+                            android:background="?android:attr/selectableItemBackground"
+                            android:layout_width="wrap_content"
+                            android:layout_height="24sp"
+                            android:text="@string/done"
+                            android:textColor="@android:color/holo_blue_light"
+                            android:id="@+id/buttonDone"
+                            android:layout_below="@+id/tvEwtTitle"
+                            android:layout_centerHorizontal="true"
+                            android:layout_marginTop="8dp" />
+
+                        <Button
+                            style="@style/ButtonBorderless.Small"
+                            android:background="?android:attr/selectableItemBackground"
+                            android:layout_width="64sp"
+                            android:layout_height="20sp"
+                            android:id="@+id/buttonFailed"
+                            android:text="@string/failure"
+                            android:textColor="@android:color/holo_blue_light"
+                            android:layout_alignTop="@+id/tvCurrent"
+                            android:layout_alignParentRight="true"
+                            android:layout_alignParentEnd="true" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?android:attr/textAppearanceSmall"
+                            android:text="@string/estimated_waiting_time"
+                            android:id="@+id/tvEwtTitle"
+                            android:layout_marginTop="8dp"
+                            android:layout_below="@+id/tvReservationTitle"
+                            android:layout_alignParentLeft="true"
+                            android:layout_alignParentStart="true"
+                            android:textColor="@color/textColorPrimary" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?android:attr/textAppearanceSmall"
+                            android:text="Small Text"
+                            android:id="@+id/tvEwt"
+                            android:layout_alignTop="@+id/tvEwtTitle"
+                            android:layout_toRightOf="@+id/tvEwtTitle"
+                            android:layout_toEndOf="@+id/tvEwtTitle"
+                            android:textColor="@color/textColorPrimary" />
+
+
+                    </RelativeLayout>
+
+                </android.support.v7.widget.CardView>
+
                 <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="@dimen/activity_vertical_margin"
                     android:paddingLeft="@dimen/activity_horizontal_margin"
                     android:paddingRight="@dimen/activity_horizontal_margin"
                     android:paddingTop="@dimen/activity_vertical_margin"
-                    android:paddingBottom="@dimen/activity_vertical_margin">
+                    android:layout_below="@+id/card_view"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textAppearance="?android:attr/textAppearanceMedium"
-                        android:text="@string/current_order"
-                        android:id="@+id/tvCurrent"
-                        android:layout_alignParentTop="true"
-                        android:layout_centerHorizontal="true" />
+                        android:text="@string/waiting"
+                        android:id="@+id/tvWaiting"
+                        android:layout_alignParentStart="true"
+                        android:layout_alignParentLeft="true" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <ListView
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAppearance="?android:attr/textAppearanceSmall"
-                        android:text="@string/order_id"
-                        android:id="@+id/tvOrderIdTitle"
+                        android:id="@+id/waitingList"
+                        android:layout_below="@+id/tvWaiting"
                         android:layout_marginTop="8dp"
-                        android:layout_below="@+id/tvCurrent"
-                        android:layout_alignParentLeft="true"
-                        android:layout_alignParentStart="true"/>
-
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="?android:attr/textAppearanceSmall"
-                        android:text="1251763094451085"
-                        android:id="@+id/tvOrderId"
-                        android:layout_alignTop="@+id/tvOrderIdTitle"
-                        android:layout_toRightOf="@+id/tvOrderIdTitle"
-                        android:layout_toEndOf="@+id/tvOrderIdTitle" />
+                        android:divider="@color/colorDivider"
+                        android:layout_alignLeft="@+id/tvWaiting"
+                        android:layout_alignStart="@+id/tvWaiting"
+                        android:background="@color/cardBackground" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textAppearance="?android:attr/textAppearanceSmall"
-                        android:text="@string/contacts"
-                        android:id="@+id/tvContactsTitle"
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:text="@string/uninformed"
+                        android:id="@+id/tvUninformed"
+                        android:layout_below="@+id/waitingList"
                         android:layout_marginTop="8dp"
-                        android:layout_below="@+id/tvOrderId"
-                        android:layout_alignParentLeft="true"
-                        android:layout_alignParentStart="true"/>
+                        android:layout_alignLeft="@+id/waitingList"
+                        android:layout_alignStart="@+id/waitingList" />
 
-
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <ListView
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAppearance="?android:attr/textAppearanceSmall"
-                        android:text="江天源 先生 15652240437"
-                        android:id="@+id/tvName"
-                        android:layout_alignTop="@+id/tvContactsTitle"
-                        android:layout_toRightOf="@+id/tvContactsTitle"
-                        android:layout_toEndOf="@+id/tvContactsTitle" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="?android:attr/textAppearanceSmall"
-                        android:text="@string/address"
-                        android:id="@+id/tvAddressTitle"
+                        android:id="@+id/uninformedList"
+                        android:layout_below="@+id/tvUninformed"
+                        android:divider="@color/colorDivider"
                         android:layout_marginTop="8dp"
-                        android:layout_below="@+id/tvName"
-                        android:layout_alignParentLeft="true"
-                        android:layout_alignParentStart="true"/>
+                        android:layout_alignLeft="@+id/tvUninformed"
+                        android:layout_alignStart="@+id/tvUninformed"
+                        android:background="@color/cardBackground" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textAppearance="?android:attr/textAppearanceSmall"
-                        android:text="北京市 海淀区 颐和园路5号 燕园街道 北京大学理科一号楼1616"
-                        android:id="@+id/tvAddress"
-                        android:layout_alignTop="@+id/tvAddressTitle"
-                        android:layout_toRightOf="@+id/tvAddressTitle"
-                        android:layout_toEndOf="@+id/tvAddressTitle" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="?android:attr/textAppearanceSmall"
-                        android:text="@string/estimation"
-                        android:id="@+id/tvReservationTitle"
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:text="@string/failed"
+                        android:id="@+id/tvFailed"
+                        android:layout_below="@+id/uninformedList"
                         android:layout_marginTop="8dp"
-                        android:layout_below="@+id/tvAddress"
-                        android:layout_alignParentLeft="true"
-                        android:layout_alignParentStart="true"/>
+                        android:layout_alignLeft="@+id/uninformedList"
+                        android:layout_alignStart="@+id/uninformedList" />
 
-                    <TextView
+                    <ListView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textAppearance="?android:attr/textAppearanceSmall"
-                        android:text="09:15"
-                        android:id="@+id/tvRes1"
-                        android:layout_alignTop="@+id/tvReservationTitle"
-                        android:layout_toRightOf="@+id/tvReservationTitle"
-                        android:layout_toEndOf="@+id/tvReservationTitle" />
-
-
-                    <Button
-                        style="@style/ButtonBorderless"
-                        android:background="?android:attr/selectableItemBackground"
-                        android:layout_width="wrap_content"
-                        android:layout_height="24sp"
-                        android:text="@string/done"
-                        android:textColor="@android:color/holo_blue_light"
-                        android:id="@+id/buttonDone"
-                        android:layout_below="@+id/tvEwtTitle"
-                        android:layout_centerHorizontal="true"
-                        android:layout_marginTop="8dp"/>
-
-                    <Button
-                        style="@style/ButtonBorderless.Small"
-                        android:background="?android:attr/selectableItemBackground"
-                        android:layout_width="64sp"
-                        android:layout_height="20sp"
-                        android:id="@+id/buttonFailed"
-                        android:text="@string/failure"
-                        android:textColor="@android:color/holo_blue_light"
-                        android:layout_alignTop="@+id/tvCurrent"
-                        android:layout_alignParentRight="true"
-                        android:layout_alignParentEnd="true" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="?android:attr/textAppearanceSmall"
-                        android:text="@string/estimated_waiting_time"
-                        android:id="@+id/tvEwtTitle"
+                        android:id="@+id/failedList"
+                        android:layout_below="@+id/tvFailed"
+                        android:divider="@color/colorDivider"
                         android:layout_marginTop="8dp"
-                        android:layout_below="@+id/tvReservationTitle"
-                        android:layout_alignParentLeft="true"
-                        android:layout_alignParentStart="true" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="?android:attr/textAppearanceSmall"
-                        android:text="Small Text"
-                        android:id="@+id/tvEwt"
-                        android:layout_alignTop="@+id/tvEwtTitle"
-                        android:layout_toRightOf="@+id/tvEwtTitle"
-                        android:layout_toEndOf="@+id/tvEwtTitle" />
-
+                        android:layout_alignLeft="@+id/tvFailed"
+                        android:layout_alignStart="@+id/tvFailed"
+                        android:background="@color/cardBackground" />
 
                 </RelativeLayout>
-
-            </android.support.v7.widget.CardView>
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingBottom="@dimen/activity_vertical_margin"
-                android:paddingLeft="@dimen/activity_horizontal_margin"
-                android:paddingRight="@dimen/activity_horizontal_margin"
-                android:paddingTop="@dimen/activity_vertical_margin"
-                android:layout_below="@+id/card_view"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:text="@string/waiting"
-                    android:id="@+id/tvWaiting"
-                    android:layout_alignParentStart="true"
-                    android:layout_alignParentLeft="true" />
-
-                <ListView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/waitingList"
-                    android:layout_below="@+id/tvWaiting"
-                    android:layout_marginTop="8dp"
-                    android:layout_alignLeft="@+id/tvWaiting"
-                    android:layout_alignStart="@+id/tvWaiting"
-                    android:background="@android:color/white" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:text="@string/uninformed"
-                    android:id="@+id/tvUninformed"
-                    android:layout_below="@+id/waitingList"
-                    android:layout_marginTop="8dp"
-                    android:layout_alignLeft="@+id/waitingList"
-                    android:layout_alignStart="@+id/waitingList" />
-
-                <ListView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/uninformedList"
-                    android:layout_below="@+id/tvUninformed"
-                    android:layout_marginTop="8dp"
-                    android:layout_alignLeft="@+id/tvUninformed"
-                    android:layout_alignStart="@+id/tvUninformed"
-                    android:background="@android:color/white" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:text="@string/failed"
-                    android:id="@+id/tvFailed"
-                    android:layout_below="@+id/uninformedList"
-                    android:layout_marginTop="8dp"
-                    android:layout_alignLeft="@+id/uninformedList"
-                    android:layout_alignStart="@+id/uninformedList" />
-
-                <ListView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/failedList"
-                    android:layout_below="@+id/tvFailed"
-                    android:layout_marginTop="8dp"
-                    android:layout_alignLeft="@+id/tvFailed"
-                    android:layout_alignStart="@+id/tvFailed"
-                    android:background="@android:color/white" />
-
             </RelativeLayout>
-        </RelativeLayout>
-    </ScrollView>
+        </ScrollView>
     </com.yalantis.phoenix.PullToRefreshView>
 </LinearLayout>

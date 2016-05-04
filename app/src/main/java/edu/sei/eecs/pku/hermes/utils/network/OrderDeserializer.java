@@ -35,6 +35,7 @@ public class OrderDeserializer implements JsonDeserializer<Order> {
         final int arriveTime = jsonObject.get("arrive_time").getAsInt();
         final int waitTime = jsonObject.get("wait_time").getAsInt();
         final int leaveTime = jsonObject.get("leave_time").getAsInt();
+        final int realTime = jsonObject.get("real_time").getAsInt();
 
         final String failure = jsonObject.get("failure_reason").getAsString();
 
@@ -48,6 +49,7 @@ public class OrderDeserializer implements JsonDeserializer<Order> {
         order.setArriveTime(arriveTime);
         order.setWaitTime(waitTime);
         order.setLeaveTime(leaveTime);
+        order.setRealTime(realTime);
         order.setFailure(failure);
         return order;
     }

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingBottom="@dimen/item_vertical_margin"
     android:paddingLeft="@dimen/item_horizontal_margin"
@@ -15,6 +16,7 @@
         android:id="@+id/tvOrderId"
         android:textAlignment="textEnd"
         android:gravity="end"
+        android:textColor="@color/textColorPrimary"
         android:layout_alignBaseline="@+id/textView3"
         android:layout_alignBottom="@+id/textView3"
         android:layout_toRightOf="@+id/textView3"
@@ -25,6 +27,7 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:text="@string/orderIDTitle"
+        android:textColor="@color/textColorPrimary"
         android:id="@+id/textView3"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
@@ -35,6 +38,7 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:text="Medium Text"
+        android:textColor="@color/textColorPrimary"
         android:id="@+id/tvRecipient"
         android:layout_below="@+id/tvOrderId"
 
@@ -49,6 +53,7 @@
         android:id="@+id/tvPhoneNum"
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
+        android:textColor="@color/textColorPrimary"
 
         android:layout_alignTop="@+id/tvRecipient"
         android:layout_toRightOf="@+id/tvRecipient"
@@ -59,9 +64,10 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:text="Medium Text"
+        android:textColor="@color/textColorPrimary"
         android:id="@+id/tvAddress"
         android:layout_below="@+id/tvRecipient"
-        android:lines="3"
+        android:lines="2"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
