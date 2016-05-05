@@ -228,8 +228,8 @@ public class PlanResultActivity extends AppCompatActivity
                                                             readyOrders.add(uninformedOrders.get(0));
                                                             uninformedOrders.remove(0);
                                                         }
-                                                        refreshList();
                                                         showProgress(false);
+                                                        refreshList();
                                                     }
                                                 }
                                             })
@@ -597,7 +597,6 @@ public class PlanResultActivity extends AppCompatActivity
                 overridePendingTransition(R.anim.move_right_in_activity, R.anim.move_left_out_activity);
                 break;
             case MENU_REFRESH:
-                pullToRefreshView.setRefreshing(true);
                 showProgress(true);
                 Toast.makeText(PlanResultActivity.this, "正在刷新...", Toast.LENGTH_SHORT).show();
                 GsonRequest gsonRequest = new GsonRequest.RequestBuilder()
@@ -610,7 +609,6 @@ public class PlanResultActivity extends AppCompatActivity
                         .successListener(new Response.Listener() {
                             @Override
                             public void onResponse(Object response) {
-                                showProgress(false);
                                 orders.clear();
                                 readyOrders.clear();
                                 uninformedOrders.clear();
@@ -636,9 +634,8 @@ public class PlanResultActivity extends AppCompatActivity
                                     }
                                 }
 
+                                showProgress(false);
                                 refreshList();
-
-                                pullToRefreshView.setRefreshing(false);
                                 Toast.makeText(PlanResultActivity.this, "刷新完毕", Toast.LENGTH_SHORT).show();
                             }
                         })
@@ -735,7 +732,6 @@ public class PlanResultActivity extends AppCompatActivity
                             .successListener(new Response.Listener() {
                                 @Override
                                 public void onResponse(Object response) {
-                                    showProgress(false);
                                     orders.clear();
                                     readyOrders.clear();
                                     uninformedOrders.clear();
@@ -761,9 +757,8 @@ public class PlanResultActivity extends AppCompatActivity
                                         }
                                     }
 
+                                    showProgress(false);
                                     refreshList();
-
-                                    pullToRefreshView.setRefreshing(false);
                                     Toast.makeText(PlanResultActivity.this, "刷新完毕", Toast.LENGTH_SHORT).show();
                                 }
                             })
@@ -1223,6 +1218,8 @@ public class PlanResultActivity extends AppCompatActivity
                 }
             });
 
+
+            pullToRefreshView.setRefreshing(show);
             if (!show) {
                 scrollView.fullScroll(View.FOCUS_UP);
             }
