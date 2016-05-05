@@ -160,8 +160,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 }
             } else {
                 TodayActivity_.intent(LoginActivity.this).start();
-                overridePendingTransition(R.anim.move_right_in_activity, R.anim.move_left_out_activity);
                 finish();
+                overridePendingTransition(R.anim.move_right_in_activity, R.anim.move_left_out_activity);
             }
         }
     }
@@ -356,8 +356,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                         editor.apply();
                         InitApplication.courier_id = username;
                         TodayActivity_.intent(LoginActivity.this).start();
-                        overridePendingTransition(R.anim.move_right_in_activity, R.anim.move_left_out_activity);
                         finish();
+                        overridePendingTransition(R.anim.move_right_in_activity, R.anim.move_left_out_activity);
                     }
                 })
                 .errorListener(new Response.ErrorListener() {

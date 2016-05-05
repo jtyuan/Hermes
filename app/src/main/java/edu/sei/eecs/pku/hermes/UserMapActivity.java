@@ -10,6 +10,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -19,6 +20,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.baidu.location.BDLocation;
 import com.baidu.location.BDLocationListener;
 import com.baidu.location.LocationClient;
@@ -27,14 +31,12 @@ import com.baidu.mapapi.SDKInitializer;
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BitmapDescriptor;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
-import com.baidu.mapapi.map.InfoWindow;
 import com.baidu.mapapi.map.MapPoi;
 import com.baidu.mapapi.map.MapStatus;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
 import com.baidu.mapapi.map.MyLocationConfiguration;
 import com.baidu.mapapi.map.MyLocationData;
-import com.baidu.mapapi.map.Text;
 import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.overlayutil.BikingRouteOverlay;
 import com.baidu.mapapi.overlayutil.DrivingRouteOverlay;
@@ -56,21 +58,29 @@ import com.baidu.mapapi.search.route.TransitRouteLine;
 import com.baidu.mapapi.search.route.TransitRouteResult;
 import com.baidu.mapapi.search.route.WalkingRouteLine;
 import com.baidu.mapapi.search.route.WalkingRouteResult;
-import com.special.ResideMenu.ResideMenu;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
 
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Locale;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import edu.sei.eecs.pku.hermes.configs.Constants;
 import edu.sei.eecs.pku.hermes.model.Order;
+import edu.sei.eecs.pku.hermes.utils.network.GsonRequest;
+import edu.sei.eecs.pku.hermes.utils.network.HttpClientRequest;
+import edu.sei.eecs.pku.hermes.utils.network.LocationGson;
+import edu.sei.eecs.pku.hermes.utils.network.OrderListGson;
+import edu.sei.eecs.pku.hermes.utils.network.ResultGson;
 import info.hoang8f.widget.FButton;
-import me.imid.swipebacklayout.lib.app.SwipeBackActivity;
 
 @EActivity(R.layout.activity_map)
-public class MapActivity extends AppCompatActivity implements BaiduMap.OnMapClickListener,
+public class UserMapActivity extends AppCompatActivity implements BaiduMap.OnMapClickListener,
         OnGetRoutePlanResultListener {
 
 
@@ -98,14 +108,12 @@ public class MapActivity extends AppCompatActivity implements BaiduMap.OnMapClic
     @ViewById(R.id.map)
     MapView mMapView;    // 地图View
     BaiduMap mBaidumap = null;
-    // 搜索相关
-    RoutePlanSearch mSearch = null;    // 搜索模块，也可去掉地图模块独立使用
 
     // 定位相关
-    public LocationClient mLocClient;
-    public MyLocationListener myListener = new MyLocationListener();
+//    public LocationClient mLocClient;
+//    public MyLocationListener myListener = new MyLocationListener();
     private boolean isFirstLoc = true; // 是否首次定位
-    private static LatLng LatLng_start;
+//    private static LatLng LatLng_start;
 
 
     @ViewById(R.id.scroll)
@@ -141,8 +149,11 @@ public class MapActivity extends AppCompatActivity implements BaiduMap.OnMapClic
     TextView titleWait;
 
     Order current;
+    String courier_id;
 
     private LatLng currentLocation = null;
+
+    private RequestQueue queue;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -151,9 +162,13 @@ public class MapActivity extends AppCompatActivity implements BaiduMap.OnMapClic
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
             current = (Order) bundle.get("current");
+            courier_id = current.getCourierId();
         } else {
             current = new Order("-1", "北京");
+            courier_id = "-1";
         }
+
+        queue = HttpClientRequest.getInstance(this.getApplicationContext()).getRequestQueue();
     }
 
     @AfterViews
@@ -174,11 +189,13 @@ public class MapActivity extends AppCompatActivity implements BaiduMap.OnMapClic
 
         titleContact.setText(getResources().getString(R.string.title_contact_map,
                 current.getRecipientName(), current.getRecipientPhone()));
-        titleAddress.setText(current.getAddress());
+//        titleAddress.setText(current.getAddress());
+        titleAddress.setVisibility(View.GONE);
         titleArrive.setText(getResources().getString(R.string.title_arrive_map,
                 current.getEstimation()));
-        titleWait.setText(getResources().getString(R.string.title_wait_map,
-                current.getWaitTime()));
+//        titleWait.setText(getResources().getString(R.string.title_wait_map,
+//                current.getWaitTime()));
+        titleWait.setVisibility(View.GONE);
         topTitle.setText(getResources().getString(R.string.title_contact_map,
                 current.getRecipientName(), current.getRecipientPhone()));
 
@@ -186,14 +203,6 @@ public class MapActivity extends AppCompatActivity implements BaiduMap.OnMapClic
         // 初始化地图
         mBaidumap = mMapView.getMap();
         mBaidumap.setMyLocationEnabled(true);
-        mLocClient = new LocationClient(this);
-        mLocClient.registerLocationListener(myListener);
-        LocationClientOption option = new LocationClientOption();
-        option.setOpenGps(true); // 打开gps
-        option.setCoorType("bd09ll"); // 设置坐标类型
-        option.setScanSpan(Constants.LOCATION_INTERVAL_FG);
-        mLocClient.setLocOption(option);
-        mLocClient.start();
         MyLocationConfiguration.LocationMode mCurrentMode = MyLocationConfiguration.LocationMode.NORMAL;
         mBaidumap
                 .setMyLocationConfigeration(new MyLocationConfiguration(
@@ -203,9 +212,6 @@ public class MapActivity extends AppCompatActivity implements BaiduMap.OnMapClic
         // 地图点击事件处理
         mBaidumap.setOnMapClickListener(this);
         // 初始化搜索模块，注册事件监听
-        mSearch = RoutePlanSearch.newInstance();
-        mSearch.setOnGetRoutePlanResultListener(this);
-//        searchButtonProcess();
 
 
 
@@ -228,13 +234,60 @@ public class MapActivity extends AppCompatActivity implements BaiduMap.OnMapClic
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "定位中...", Snackbar.LENGTH_SHORT)
-                        .setAction("Action", null).show();
-                zoomToPoint(currentLocation);
-                Snackbar.make(view, "定位完毕: " + currentLocation.longitude + "," + currentLocation.latitude, Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                findCourier(courier_id);
             }
         });
+
+        Runnable courierLocatingRunnable = new Runnable() {
+            @Override
+            public void run() {
+                findCourier(courier_id);
+            }
+        };
+        ScheduledExecutorService service = Executors
+                .newSingleThreadScheduledExecutor();
+        service.scheduleAtFixedRate(courierLocatingRunnable, 0, 180, TimeUnit.SECONDS);
+
+    }
+
+    private void findCourier(String courier_id) {
+
+        Log.d("fundcourier", String.format(Locale.SIMPLIFIED_CHINESE, Constants.LOC_URL, courier_id));
+        Snackbar.make(container, "寻找快递员中...", Snackbar.LENGTH_SHORT)
+                .setAction("Action", null).show();
+        GsonRequest gsonRequest = new GsonRequest.RequestBuilder()
+//                .post()
+                .url(String.format(Locale.SIMPLIFIED_CHINESE, Constants.LOC_URL, courier_id))
+                .clazz(LocationGson.class)
+                .successListener(new Response.Listener() {
+                    @Override
+                    public void onResponse(Object response) {
+                        if (((LocationGson)response).status.equals("ok")) {
+                            currentLocation = new LatLng(((LocationGson)response).getLat(), ((LocationGson)response).getLon());
+                            MyLocationData locData = new MyLocationData.Builder()
+                                    .accuracy(10).direction(100)
+                                    .latitude(currentLocation.latitude)
+                                    .longitude(currentLocation.longitude).build();
+                            mBaidumap.setMyLocationData(locData);
+                            zoomToPoint(currentLocation);
+                            Snackbar.make(container, "快递员定位完毕: " +
+                                    currentLocation.longitude + "," +
+                                    currentLocation.latitude,
+                                    Snackbar.LENGTH_LONG)
+                                    .setAction("Action", null).show();
+                        }
+                    }
+                })
+                .errorListener(new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d("bg_location", "upload error: " + error.getMessage());
+                        Snackbar.make(container, "定位失败，请检查网络连接", Snackbar.LENGTH_LONG)
+                                .setAction("Action", null).show();
+                    }
+                })
+                .build();
+        queue.add(gsonRequest);
     }
 
     /**
@@ -293,121 +346,6 @@ public class MapActivity extends AppCompatActivity implements BaiduMap.OnMapClic
         v.startAnimation(alphaAnimation);
     }
 
-    /**
-     * 发起路线规划搜索示例
-     *
-     */
-    public void searchButtonProcess() {
-        // 重置浏览节点的路线数据
-        route = null;
-        mBtnPre.setVisibility(View.INVISIBLE);
-        mBtnNext.setVisibility(View.INVISIBLE);
-        mBaidumap.clear();
-        // 设置起终点信息，对于tranist search 来说，城市名无意义
-        PlanNode stNode = PlanNode.withLocation(LatLng_start);
-//        PlanNode stNode = PlanNode.withCityNameAndPlaceName("北京", "北京大学45乙");
-//        PlanNode enNode = PlanNode.withCityNameAndPlaceName("北京", "启迪科技大厦");
-        String[] addressNodes = current.getAddress().split("\\.");
-//        PlanNode enNode = PlanNode.withCityNameAndPlaceName(addressNodes[0],
-//                addressNodes[addressNodes.length - 1]);
-        PlanNode enNode = PlanNode.withCityNameAndPlaceName(addressNodes[0],
-                current.getAddress());
-
-
-        Snackbar.make(container,
-                getResources().getString(R.string.snackbar_address_start), Snackbar.LENGTH_INDEFINITE)
-                .setAction("Action", null).show();
-
-        mSearch.bikingSearch((new BikingRoutePlanOption())
-                .from(stNode).to(enNode));
-
-    }
-
-    /**
-     * 节点浏览
-     *
-     * @param v
-     */
-    public void nodeClick(View v) {
-        if (route == null || route.getAllStep() == null) {
-            return;
-        }
-        if (nodeIndex == -1 && v.getId() == R.id.pre) {
-            return;
-        }
-        // 设置节点索引
-        if (v.getId() == R.id.next) {
-            if (nodeIndex < route.getAllStep().size() - 1) {
-                nodeIndex++;
-            } else {
-                return;
-            }
-        } else if (v.getId() == R.id.pre) {
-            if (nodeIndex > 0) {
-                nodeIndex--;
-            } else {
-                return;
-            }
-        }
-        // 获取节结果信息
-        LatLng nodeLocation = null;
-        String nodeTitle = null;
-        Object step = route.getAllStep().get(nodeIndex);
-        if (step instanceof DrivingRouteLine.DrivingStep) {
-            nodeLocation = ((DrivingRouteLine.DrivingStep) step).getEntrance().getLocation();
-            nodeTitle = ((DrivingRouteLine.DrivingStep) step).getInstructions();
-        } else if (step instanceof WalkingRouteLine.WalkingStep) {
-            nodeLocation = ((WalkingRouteLine.WalkingStep) step).getEntrance().getLocation();
-            nodeTitle = ((WalkingRouteLine.WalkingStep) step).getInstructions();
-        } else if (step instanceof TransitRouteLine.TransitStep) {
-            nodeLocation = ((TransitRouteLine.TransitStep) step).getEntrance().getLocation();
-            nodeTitle = ((TransitRouteLine.TransitStep) step).getInstructions();
-        } else if (step instanceof BikingRouteLine.BikingStep) {
-            nodeLocation = ((BikingRouteLine.BikingStep) step).getEntrance().getLocation();
-            nodeTitle = ((BikingRouteLine.BikingStep) step).getInstructions();
-        }
-
-        if (nodeLocation == null || nodeTitle == null) {
-            return;
-        }
-        // 移动节点至中心
-        mBaidumap.setMapStatus(MapStatusUpdateFactory.newLatLng(nodeLocation));
-        Snackbar.make(container, nodeTitle, Snackbar.LENGTH_INDEFINITE).show();
-//        // show popup
-//        popupText = new TextView(MapActivity.this);
-//        popupText.setBackgroundResource(R.drawable.popup);
-//        popupText.setTextColor(0xFF000000);
-//        popupText.setText(nodeTitle);
-//        popupText.setPadding(32,24,32,24);
-//        mBaidumap.showInfoWindow(new InfoWindow(popupText, nodeLocation, 0));
-
-    }
-
-    /**
-     * 切换路线图标，刷新地图使其生效
-     * 注意： 起终点图标使用中心对齐.
-     */
-    public void changeRouteIcon(View v) {
-        if (routeOverlay == null) {
-            return;
-        }
-        if (useDefaultIcon) {
-            ((Button) v).setText("自定义起终点图标");
-            Toast.makeText(this,
-                    "将使用系统起终点图标",
-                    Toast.LENGTH_SHORT).show();
-
-        } else {
-            ((Button) v).setText("系统起终点图标");
-            Toast.makeText(this,
-                    "将使用自定义起终点图标",
-                    Toast.LENGTH_SHORT).show();
-
-        }
-        useDefaultIcon = !useDefaultIcon;
-        routeOverlay.removeFromMap();
-        routeOverlay.addToMap();
-    }
 
 
     @Override
@@ -418,7 +356,7 @@ public class MapActivity extends AppCompatActivity implements BaiduMap.OnMapClic
     @Override
     public void onGetWalkingRouteResult(WalkingRouteResult result) {
         if (result == null || result.error != SearchResult.ERRORNO.NO_ERROR) {
-            Toast.makeText(MapActivity.this, "抱歉，未找到结果", Toast.LENGTH_SHORT).show();
+            Toast.makeText(UserMapActivity.this, "抱歉，未找到结果", Toast.LENGTH_SHORT).show();
         }
         if (result.error == SearchResult.ERRORNO.AMBIGUOUS_ROURE_ADDR) {
             // 起终点或途经点地址有岐义，通过以下接口获取建议查询信息
@@ -444,7 +382,7 @@ public class MapActivity extends AppCompatActivity implements BaiduMap.OnMapClic
     public void onGetTransitRouteResult(TransitRouteResult result) {
 
         if (result == null || result.error != SearchResult.ERRORNO.NO_ERROR) {
-            Toast.makeText(MapActivity.this, "抱歉，未找到结果", Toast.LENGTH_SHORT).show();
+            Toast.makeText(UserMapActivity.this, "抱歉，未找到结果", Toast.LENGTH_SHORT).show();
         }
         if (result.error == SearchResult.ERRORNO.AMBIGUOUS_ROURE_ADDR) {
             // 起终点或途经点地址有岐义，通过以下接口获取建议查询信息
@@ -468,7 +406,7 @@ public class MapActivity extends AppCompatActivity implements BaiduMap.OnMapClic
     @Override
     public void onGetDrivingRouteResult(DrivingRouteResult result) {
         if (result == null || result.error != SearchResult.ERRORNO.NO_ERROR) {
-            Toast.makeText(MapActivity.this, "抱歉，未找到结果", Toast.LENGTH_SHORT).show();
+            Toast.makeText(UserMapActivity.this, "抱歉，未找到结果", Toast.LENGTH_SHORT).show();
         }
         if (result.error == SearchResult.ERRORNO.AMBIGUOUS_ROURE_ADDR) {
             // 起终点或途经点地址有岐义，通过以下接口获取建议查询信息
@@ -497,11 +435,7 @@ public class MapActivity extends AppCompatActivity implements BaiduMap.OnMapClic
         }
         if (bikingRouteResult != null && bikingRouteResult.error == SearchResult.ERRORNO.AMBIGUOUS_ROURE_ADDR) {
             // 起终点或途经点地址有岐义，通过以下接口获取建议查询信息
-            SuggestAddrInfo suggest = bikingRouteResult.getSuggestAddrInfo();
-            PlanNode stNode = PlanNode.withLocation(suggest.getSuggestStartNode().get(0).location);
-            PlanNode enNode = PlanNode.withLocation(suggest.getSuggestEndNode().get(0).location);
-            mSearch.bikingSearch((new BikingRoutePlanOption())
-                    .from(stNode).to(enNode));
+//            SuggestAddrInfo suggest = bikingRouteResult.getSuggestAddrInfo();
             return;
         }
         if (bikingRouteResult != null && bikingRouteResult.error == SearchResult.ERRORNO.NO_ERROR) {
@@ -638,47 +572,10 @@ public class MapActivity extends AppCompatActivity implements BaiduMap.OnMapClic
 
     @Override
     protected void onDestroy() {
-        mSearch.destroy();
+//        mSearch.destroy();
         mMapView.onDestroy();
-        mLocClient.stop();
+//        mLocClient.stop();
         super.onDestroy();
-    }
-
-
-    /**
-     * 定位SDK监听函数
-     */
-    public class MyLocationListener implements BDLocationListener {
-
-        @Override
-        public void onReceiveLocation(BDLocation location) {
-            // map view 销毁后不在处理新接收的位置
-            if (location == null || mMapView == null) {
-                return;
-            }
-            MyLocationData locData = new MyLocationData.Builder()
-                    .accuracy(location.getRadius())
-                    // 此处设置开发者获取到的方向信息，顺时针0-360
-                    .direction(100).latitude(location.getLatitude())
-                    .longitude(location.getLongitude()).build();
-            mBaidumap.setMyLocationData(locData);
-
-            currentLocation = new LatLng(location.getLatitude(),
-                    location.getLongitude());
-
-            if (isFirstLoc) {
-                isFirstLoc = false;
-                LatLng ll = new LatLng(location.getLatitude(),
-                        location.getLongitude());
-                LatLng_start = new LatLng(location.getLatitude(),
-                        location.getLongitude());
-                searchButtonProcess();
-                zoomToPoint(ll);
-            }
-        }
-
-        public void onReceivePoi(BDLocation poiLocation) {
-        }
     }
 
     private void zoomToPoint(LatLng ll) {

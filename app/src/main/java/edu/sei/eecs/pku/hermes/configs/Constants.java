@@ -7,9 +7,9 @@ public class Constants {
     public static final int FAILED_REASON_NUM = 3;
     // URL needs to be strictly the same as the route settings in the play server
     public static final String BASE_URL = "http://192.168.1.10:9000";
-    public static final String LOC_URL = "http://192.168.1.10:9000/courier/%s/loc";
+    public static final String LOC_URL = BASE_URL + "/courier/%s/loc";
     public static final String LOGIN_URL = "http://192.168.1.10:9001/oauth2/access_token/";
-    public static final String AUTH_URL = "http://192.168.1.10:9000/oauth";
+    public static final String AUTH_URL = BASE_URL + "/oauth";
     public static final int DISPATCHING_CENTER = -1;
 
     // -1 起始点， 0 未发送短信，1 已发短信，2 已送达，3冲突

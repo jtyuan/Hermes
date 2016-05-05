@@ -1,7 +1,8 @@
 <resources>
     <string name="app_name">快递助手</string>
-    <string name="activity_today">今日订单</string>
-    <string name="activity_plan_result">规划结果</string>
+    <string name="activity_today">快递助手</string>
+    <string name="activity_plan_result">今日配送</string>
+    <string name="activity_my_list">我的订单</string>
     <string name="activity_completed_order">配送历史</string>
     <string name="btn_confirm">确定</string>
     <string name="btn_plan">开始规划</string>
@@ -15,9 +16,11 @@
     <string name="failure">配送失败</string>
     <string name="done">确认送达</string>
     <string name="other_user">普通用户请点这里</string>
+    <string name="sending">正在配送的订单</string>
     <string name="waiting">即将配送的订单</string>
     <string name="uninformed">未短信通知订单</string>
     <string name="failed">配送失败的订单</string>
+    <string name="completed">配送完成的订单</string>
     <string name="detail_order">订单详情</string>
     <string name="reservation">预约时间：</string>
     <string name="header_title">title</string>
@@ -158,8 +161,10 @@
     <string name="title_contact_map">%1$s %2$s</string>
     <string name="title_address_map">送货地址: %s</string>
     <string name="title_arrive_map">预计到达: %s</string>
-    <string name="title_wait_map">预计等待时间: %s 秒</string>
-    <string name="snackbar_address">"目的地：%s. 路径规划完毕. "</string>
+    <string name="title_wait_map">预计等待: %s 秒</string>
+
+    <string name="snackbar_address_start">"正在规划导航路径，请稍等…"</string>
+    <string name="snackbar_address">"导航路径规划完毕. "</string>
     <string name="failure_reason">失败原因：</string>
     <string name="dialog_done_confirm">确认成功配送到收货人%s手中？</string>
     <string name="dialog_done_time">当前时间：%s</string>

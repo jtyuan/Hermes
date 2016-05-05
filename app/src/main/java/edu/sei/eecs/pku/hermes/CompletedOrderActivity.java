@@ -317,18 +317,20 @@ public class CompletedOrderActivity extends AppCompatActivity implements View.On
         if (v == itemHome) {
             resideMenu.closeMenu();
             TodayActivity_.intent(CompletedOrderActivity.this).start();
-            overridePendingTransition(R.anim.move_right_in_activity, R.anim.move_left_out_activity);
             finish();
+            overridePendingTransition(R.anim.move_right_in_activity, R.anim.move_left_out_activity);
         } else if (v == itemToday) {
             resideMenu.closeMenu();
             PlanResultActivity_.intent(CompletedOrderActivity.this).start();
-            overridePendingTransition(R.anim.move_right_in_activity, R.anim.move_left_out_activity);
             finish();
+            overridePendingTransition(R.anim.move_right_in_activity, R.anim.move_left_out_activity);
         } else if (v == itemHistory) {
             resideMenu.closeMenu();
         } else if (v == itemMyList) {
             resideMenu.closeMenu();
-
+            UserListActivity_.intent(CompletedOrderActivity.this).start();
+            finish();
+            overridePendingTransition(R.anim.move_right_in_activity, R.anim.move_left_out_activity);
         } else if (v == itemLogout) {
             resideMenu.closeMenu();
             SharedPreferences.Editor editor = loginInfo.edit();
@@ -338,9 +340,10 @@ public class CompletedOrderActivity extends AppCompatActivity implements View.On
             editor.putString("refresh_token", "");
             editor.putLong("expires_by", 0);
             editor.apply();
+            LocationService_.intent(getApplication()).stop();
             LoginActivity_.intent(CompletedOrderActivity.this).start();
-            overridePendingTransition(R.anim.move_left_in_activity, R.anim.move_right_out_activity);
             finish();
+            overridePendingTransition(R.anim.move_left_in_activity, R.anim.move_right_out_activity);
         }
     }
 

@@ -252,9 +252,9 @@ public class CustomerLoginActivity extends AppCompatActivity {
                 editor.apply();
 
                 TodayActivity_.intent(CustomerLoginActivity.this).start();
-                overridePendingTransition(R.anim.move_right_in_activity, R.anim.move_left_out_activity);
                 LoginActivity.instance.finish();
                 finish();
+                overridePendingTransition(R.anim.move_right_in_activity, R.anim.move_left_out_activity);
             }
         }
 

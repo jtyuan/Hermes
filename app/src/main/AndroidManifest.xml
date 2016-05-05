@@ -62,6 +62,9 @@
             android:name=".PlanResultActivity_"
             android:label="@string/activity_plan_result" />
         <activity
+            android:name=".UserListActivity_"
+            android:label="@string/activity_my_list" />
+        <activity
             android:name=".CompletedOrderActivity_"
             android:label="@string/activity_completed_order" />
 
@@ -186,6 +189,11 @@
         <activity
             android:name=".MapActivity_"
             android:parentActivityName=".PlanResultActivity_"
+            android:theme="@style/AppTheme.NoActionBar" />
+
+        <activity
+            android:name=".UserMapActivity_"
+            android:parentActivityName=".UserListActivity_"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".LoginActivity_"

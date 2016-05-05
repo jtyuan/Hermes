@@ -26,9 +26,9 @@ public class OrderListDeserializer implements JsonDeserializer<OrderListGson> {
 
         final Order[] orders = context.deserialize(jsonObject.get("orders"), Order[].class);
 
-        for (Order o : orders) {
-            o.setCourierId(courierId);
-        }
+//        for (Order o : orders) {
+//            o.setCourierId(courierId);
+//        }
 
         final OrderListGson list = new OrderListGson();
         list.setStatus(status);

@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
 //        setSupportActionBar(toolbar);
 //        JPushInterface.init(getApplicationContext());
 
-        this.startService(new Intent(this, PushService.class));
+//        this.startService(new Intent(this, PushService.class));
         PushService_.intent(getApplication()).start();
 
 //        MapActivity_.intent(MainActivity.this).start();

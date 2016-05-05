@@ -189,7 +189,7 @@ public class GsonRequest<T> extends Request<T> {
 
         public GsonRequest build() {
 
-            if (this.method == Method.GET && params.size() > 0) {
+            if (this.method == Method.GET && params != null && params.size() > 0) {
 //                this.url += '?';
                 for (Map.Entry<String, String> entry : params.entrySet()) {
 //                    this.url += entry.getKey() + '=' + entry.getValue() + '&';

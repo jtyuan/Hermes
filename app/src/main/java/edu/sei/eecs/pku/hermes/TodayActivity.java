@@ -179,7 +179,7 @@ public class TodayActivity extends AppCompatActivity implements View.OnClickList
         loginInfo = getSharedPreferences("login", MODE_PRIVATE);
         isCourier = loginInfo.getBoolean("isCourier", false);
         if (isCourier) {
-            this.startService(new Intent(this, LocationService.class));
+//            this.startService(new Intent(this, LocationService.class));
             LocationService_.intent(getApplication()).start();
         }
     }
@@ -263,16 +263,18 @@ public class TodayActivity extends AppCompatActivity implements View.OnClickList
         } else if (v == itemToday) {
             resideMenu.closeMenu();
             PlanResultActivity_.intent(TodayActivity.this).start();
-            overridePendingTransition(R.anim.move_right_in_activity, R.anim.move_left_out_activity);
             finish();
+            overridePendingTransition(R.anim.move_right_in_activity, R.anim.move_left_out_activity);
         } else if (v == itemHistory) {
             resideMenu.closeMenu();
             CompletedOrderActivity_.intent(TodayActivity.this).start();
-            overridePendingTransition(R.anim.move_right_in_activity, R.anim.move_left_out_activity);
             finish();
+            overridePendingTransition(R.anim.move_right_in_activity, R.anim.move_left_out_activity);
         } else if (v == itemMyList) {
             resideMenu.closeMenu();
-
+            UserListActivity_.intent(TodayActivity.this).start();
+            finish();
+            overridePendingTransition(R.anim.move_right_in_activity, R.anim.move_left_out_activity);
         } else if (v == itemLogout) {
             resideMenu.closeMenu();
             SharedPreferences.Editor editor = loginInfo.edit();
@@ -282,9 +284,10 @@ public class TodayActivity extends AppCompatActivity implements View.OnClickList
             editor.putString("refresh_token", "");
             editor.putLong("expires_by", 0);
             editor.apply();
+            LocationService_.intent(getApplication()).stop();
             LoginActivity_.intent(TodayActivity.this).start();
-            overridePendingTransition(R.anim.move_left_in_activity, R.anim.move_right_out_activity);
             finish();
+            overridePendingTransition(R.anim.move_left_in_activity, R.anim.move_right_out_activity);
         }
     }
 
