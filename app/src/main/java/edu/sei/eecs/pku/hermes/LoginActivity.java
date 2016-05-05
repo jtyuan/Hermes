@@ -152,10 +152,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         if (isLogged) {
             if (isCourier) {
                 String refresh_token = loginInfo.getString("refresh_token", "default");
-
                 long expires_by = loginInfo.getLong("expires_by", 0);
                 if (System.currentTimeMillis() / 1000 < expires_by) {
-
                     relogin(username, refresh_token);
                 } else {
                     Toast.makeText(LoginActivity.this, "长期未使用，请重新登录", Toast.LENGTH_SHORT).show();
@@ -356,7 +354,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                         editor.putString("refresh_token", refresh_token);
                         editor.putLong("expires_by", System.currentTimeMillis()/1000 + expires_in);
                         editor.apply();
-
+                        InitApplication.courier_id = username;
                         TodayActivity_.intent(LoginActivity.this).start();
                         overridePendingTransition(R.anim.move_right_in_activity, R.anim.move_left_out_activity);
                         finish();

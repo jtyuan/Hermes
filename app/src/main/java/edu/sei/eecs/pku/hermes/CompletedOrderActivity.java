@@ -333,6 +333,7 @@ public class CompletedOrderActivity extends AppCompatActivity implements View.On
             resideMenu.closeMenu();
             SharedPreferences.Editor editor = loginInfo.edit();
             editor.putBoolean("isLogged", false);
+            editor.putBoolean("isCourier", false);
             editor.putString("access_token", "");
             editor.putString("refresh_token", "");
             editor.putLong("expires_by", 0);

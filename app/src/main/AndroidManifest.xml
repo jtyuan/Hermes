@@ -197,7 +197,12 @@
         <activity
             android:name=".HomeActivity_"
             android:label="@string/title_activity_home"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
+
+        <service
+            android:name=".LocationService_"
+            android:enabled="true"
+            android:exported="true"/>
     </application>
 
 </manifest>

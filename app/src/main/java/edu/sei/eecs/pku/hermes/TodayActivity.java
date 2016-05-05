@@ -1,6 +1,7 @@
 package edu.sei.eecs.pku.hermes;
 
 import android.annotation.TargetApi;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
@@ -174,6 +175,13 @@ public class TodayActivity extends AppCompatActivity implements View.OnClickList
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 //        init();
+
+        loginInfo = getSharedPreferences("login", MODE_PRIVATE);
+        isCourier = loginInfo.getBoolean("isCourier", false);
+        if (isCourier) {
+            this.startService(new Intent(this, LocationService.class));
+            LocationService_.intent(getApplication()).start();
+        }
     }
 
     @AfterViews
@@ -207,9 +215,6 @@ public class TodayActivity extends AppCompatActivity implements View.OnClickList
         itemHistory.setOnClickListener(this);
         itemLogout.setOnClickListener(this);
         itemMyList.setOnClickListener(this);
-
-        loginInfo = getSharedPreferences("login", MODE_PRIVATE);
-        isCourier = loginInfo.getBoolean("isCourier", false);
 
         resideMenu.addMenuItem(itemHome, ResideMenu.DIRECTION_LEFT);
 
@@ -272,6 +277,7 @@ public class TodayActivity extends AppCompatActivity implements View.OnClickList
             resideMenu.closeMenu();
             SharedPreferences.Editor editor = loginInfo.edit();
             editor.putBoolean("isLogged", false);
+            editor.putBoolean("isCourier", false);
             editor.putString("access_token", "");
             editor.putString("refresh_token", "");
             editor.putLong("expires_by", 0);

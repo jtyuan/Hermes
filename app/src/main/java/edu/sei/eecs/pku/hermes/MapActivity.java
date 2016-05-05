@@ -63,6 +63,7 @@ import org.androidannotations.annotations.ViewById;
 
 import java.util.ArrayList;
 
+import edu.sei.eecs.pku.hermes.configs.Constants;
 import edu.sei.eecs.pku.hermes.model.Order;
 import info.hoang8f.widget.FButton;
 import me.imid.swipebacklayout.lib.app.SwipeBackActivity;
@@ -189,7 +190,7 @@ public class MapActivity extends AppCompatActivity implements BaiduMap.OnMapClic
         LocationClientOption option = new LocationClientOption();
         option.setOpenGps(true); // 打开gps
         option.setCoorType("bd09ll"); // 设置坐标类型
-        option.setScanSpan(1000);
+        option.setScanSpan(Constants.LOCATION_INTERVAL_FG);
         mLocClient.setLocOption(option);
         mLocClient.start();
         MyLocationConfiguration.LocationMode mCurrentMode = MyLocationConfiguration.LocationMode.NORMAL;

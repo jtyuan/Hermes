@@ -1042,6 +1042,7 @@ public class PlanResultActivity extends AppCompatActivity implements View.OnClic
             resideMenu.closeMenu();
             SharedPreferences.Editor editor = loginInfo.edit();
             editor.putBoolean("isLogged", false);
+            editor.putBoolean("isCourier", false);
             editor.putString("access_token", "");
             editor.putString("refresh_token", "");
             editor.putLong("expires_by", 0);
