@@ -172,8 +172,7 @@ public class MapActivity extends AppCompatActivity implements BaiduMap.OnMapClic
 
         titleContact.setText(getResources().getString(R.string.title_contact_map,
                 current.getRecipientName(), current.getRecipientPhone()));
-        titleAddress.setText(getResources().getString(R.string.title_address_map,
-                current.getAddress()));
+        titleAddress.setText(current.getAddress());
         titleArrive.setText(getResources().getString(R.string.title_arrive_map,
                 current.getEstimation()));
         titleWait.setText(getResources().getString(R.string.title_wait_map,

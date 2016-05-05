@@ -48,7 +48,6 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
                         android:gravity="bottom|center"
-                        android:text="@string/address"
                         android:textColor="@android:color/white"
                         android:textSize="20sp" />
 
@@ -60,7 +59,10 @@
                         android:layout_gravity="start"
                         android:gravity="bottom|center"
                         android:layout_marginTop="4dp"
-                        android:text="@string/app_name"
+                        android:layout_marginLeft="48dp"
+                        android:layout_marginStart="48dp"
+                        android:layout_marginRight="48dp"
+                        android:layout_marginEnd="48dp"
                         android:textColor="@android:color/white"
                         android:textSize="16sp" />
 
@@ -71,7 +73,10 @@
                         android:layout_gravity="start"
                         android:gravity="bottom|center"
                         android:layout_marginTop="4dp"
-                        android:text="@string/app_name"
+                        android:layout_marginLeft="64dp"
+                        android:layout_marginStart="64dp"
+                        android:layout_marginRight="64dp"
+                        android:layout_marginEnd="64dp"
                         android:textColor="@android:color/white"
                         android:textSize="16sp" />
 
@@ -82,7 +87,10 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="start"
                         android:gravity="bottom|center"
-                        android:text="@string/address"
+                        android:layout_marginLeft="64dp"
+                        android:layout_marginStart="64dp"
+                        android:layout_marginRight="64dp"
+                        android:layout_marginEnd="64dp"
                         android:textColor="@android:color/white"
                         android:textSize="16sp" />
 

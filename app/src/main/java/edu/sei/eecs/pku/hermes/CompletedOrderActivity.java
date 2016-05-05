@@ -88,7 +88,7 @@ public class CompletedOrderActivity extends AppCompatActivity implements View.On
     @ItemClick
     public void completedListItemClicked(Order clickItem) {
 
-        Holder holder = new ViewHolder(R.layout.dialog_done);
+        Holder holder = new ViewHolder(R.layout.list_detail_raw);
 
         View headerView = View.inflate(CompletedOrderActivity.this, R.layout.detail_dialog_header, null);
         View footerView = View.inflate(CompletedOrderActivity.this, R.layout.detail_dialog_footer_one_button, null);
@@ -269,7 +269,7 @@ public class CompletedOrderActivity extends AppCompatActivity implements View.On
             // Show the Up button in the action bar.
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
-            getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_drawer);
+            getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp);
         }
     }
 

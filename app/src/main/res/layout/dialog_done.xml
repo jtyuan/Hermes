@@ -27,6 +27,7 @@
             flatui:fl_space="14dip"
             flatui:fl_cornerRadius="100dip"
             flatui:theme="@array/toggle_theme"
+            android:id="@+id/toggle"
             android:layout_centerVertical="true"
             android:layout_height="36dp"
             android:layout_width="72dp"

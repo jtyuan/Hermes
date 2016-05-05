@@ -5,6 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:flatui="http://schemas.android.com/apk/res-auto"
     android:scrollbars="vertical"
     android:orientation="vertical"
     android:background="@color/windowBackground"
@@ -167,30 +168,38 @@
                             android:layout_toEndOf="@+id/tvReservationTitle"
                             android:textColor="@color/textColorPrimary" />
 
-
-                        <Button
-                            style="@style/ButtonBorderless"
-                            android:background="?android:attr/selectableItemBackground"
-                            android:layout_width="wrap_content"
-                            android:layout_height="24sp"
-                            android:text="@string/done"
-                            android:textColor="@android:color/holo_blue_light"
-                            android:id="@+id/buttonDone"
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
                             android:layout_below="@+id/tvEwtTitle"
                             android:layout_centerHorizontal="true"
-                            android:layout_marginTop="8dp" />
+                            android:layout_marginTop="8dp"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
 
-                        <Button
-                            style="@style/ButtonBorderless.Small"
-                            android:background="?android:attr/selectableItemBackground"
-                            android:layout_width="64sp"
-                            android:layout_height="20sp"
-                            android:id="@+id/buttonFailed"
-                            android:text="@string/failure"
-                            android:textColor="@android:color/holo_blue_light"
-                            android:layout_alignTop="@+id/tvCurrent"
-                            android:layout_alignParentRight="true"
-                            android:layout_alignParentEnd="true" />
+                            <com.cengalabs.flatui.views.FlatButton
+                                flatui:fl_theme="@array/blood"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:id="@+id/buttonFailed"
+                                flatui:fl_touchEffect="fl_ripple"
+                                android:text="@string/failure"
+                                android:layout_margin="3dp"
+                                android:layout_weight="1"/>
+
+                            <com.cengalabs.flatui.views.FlatButton
+                                flatui:fl_theme="@array/grass"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:text="@string/done"
+                                android:id="@+id/buttonDone"
+                                flatui:fl_touchEffect="fl_ripple"
+                                android:layout_margin="3dp"
+                                android:layout_weight="1"/>
+
+                        </LinearLayout>
+
+
 
                         <TextView
                             android:layout_width="wrap_content"

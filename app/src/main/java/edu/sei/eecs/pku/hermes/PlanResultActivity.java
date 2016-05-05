@@ -28,11 +28,13 @@ import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.baidu.mapapi.map.Text;
+import com.cengalabs.flatui.views.FlatToggleButton;
 import com.lsjwzh.widget.materialloadingprogressbar.CircleProgressBar;
 import com.orhanobut.dialogplus.DialogPlus;
 import com.orhanobut.dialogplus.Holder;
@@ -159,7 +161,7 @@ public class PlanResultActivity extends AppCompatActivity implements View.OnClic
         Holder holder = new ViewHolder(R.layout.dialog_done);
 
         View headerView = View.inflate(PlanResultActivity.this, R.layout.detail_dialog_header, null);
-        View footerView = View.inflate(PlanResultActivity.this, R.layout.detail_dialog_footer_one_button, null);
+        View footerView = View.inflate(PlanResultActivity.this, R.layout.detail_dialog_footer_two_buttons, null);
 
         Calendar calendar = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.CHINA);
@@ -167,53 +169,61 @@ public class PlanResultActivity extends AppCompatActivity implements View.OnClic
         ((TextView)headerView.findViewById(R.id.tvHeaderTitle)).setText(R.string.detail_header_title);
         ((TextView)headerView.findViewById(R.id.tvHeaderSub)).setText("配送成功");
 //        (footerView.findViewById(R.id.tvFooterTitle)).setVisibility(View.INVISIBLE);
-        ((TextView)footerView.findViewById(R.id.tvFooterTitle)).setText(getResources()
-                .getString(R.string.dialog_done_time, sdf.format(calendar.getTime())));
+        ((TextView)footerView.findViewById(R.id.tvFooterTitle)).setText(sdf.format(calendar.getTime()));
 
+
+        boolean isChecked = false;
         DialogPlus dialog = DialogPlus.newDialog(PlanResultActivity.this)
                 .setContentHolder(holder)
                 .setHeader(headerView)
                 .setFooter(footerView)
-                .setGravity(Gravity.CENTER)
+                .setGravity(Gravity.TOP)
                 .setCancelable(true)
                 .setOnClickListener(new OnClickListener() {
                     @Override
                     public void onClick(DialogPlus dialog, View view) {
                         switch (view.getId()) {
                             case R.id.footer_confirm_button:
-                                showProgress(true);
-                                GsonRequest gsonRequest = new GsonRequest.RequestBuilder()
-//                .post()
-                                        .url(Constants.BASE_URL)
-                                        .addParams("delivery", readyOrders.get(0).getOrderId())
-                                        .addParams("inform", String.valueOf(Constants.STATUS_COMPLETED))
-                                        .clazz(ResultGson.class)
-                                        .successListener(new Response.Listener() {
-                                            @Override
-                                            public void onResponse(Object response) {
-                                                if (((ResultGson) response).status.equals("ok")) {
-                                                    completedOrders.add(readyOrders.get(0));
-                                                    readyOrders.remove(0);
-                                                    if (uninformedOrders.size() > 0) {
-                                                        readyOrders.add(uninformedOrders.get(0));
-                                                        uninformedOrders.remove(0);
+                                View holderView = dialog.getHolderView();
+                                FlatToggleButton toggle = (FlatToggleButton) holderView.findViewById(R.id.toggle);
+                                if (toggle.isChecked()) {
+                                    showProgress(true);
+                                    GsonRequest gsonRequest = new GsonRequest.RequestBuilder()
+                                            .url(Constants.BASE_URL)
+                                            .addParams("delivery", readyOrders.get(0).getOrderId())
+                                            .addParams("inform", String.valueOf(Constants.STATUS_COMPLETED))
+                                            .clazz(ResultGson.class)
+                                            .successListener(new Response.Listener() {
+                                                @Override
+                                                public void onResponse(Object response) {
+                                                    if (((ResultGson) response).status.equals("ok")) {
+                                                        completedOrders.add(readyOrders.get(0));
+                                                        readyOrders.remove(0);
+                                                        if (uninformedOrders.size() > 0) {
+                                                            readyOrders.add(uninformedOrders.get(0));
+                                                            uninformedOrders.remove(0);
+                                                        }
+                                                        refreshList();
+                                                        showProgress(false);
                                                     }
-                                                    refreshList();
+                                                }
+                                            })
+                                            .errorListener(new Response.ErrorListener() {
+                                                @Override
+                                                public void onErrorResponse(VolleyError error) {
+                                                    Toast.makeText(PlanResultActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
                                                     showProgress(false);
                                                 }
-                                            }
-                                        })
-                                        .errorListener(new Response.ErrorListener() {
-                                            @Override
-                                            public void onErrorResponse(VolleyError error) {
-                                                Toast.makeText(PlanResultActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
-                                                showProgress(false);
-                                            }
-                                        })
-                                        .build();
-                                queue.add(gsonRequest);
-                                dialog.dismiss();
+                                            })
+                                            .build();
+                                    queue.add(gsonRequest);
+                                    dialog.dismiss();
+                                } else {
+                                    Toast.makeText(PlanResultActivity.this, "请确认是否送达收货人手中", Toast.LENGTH_SHORT).show();
+                                }
                                 break;
+                            case R.id.footer_close_button:
+                                dialog.dismiss();
                         }
                     }
                 })
@@ -223,6 +233,15 @@ public class PlanResultActivity extends AppCompatActivity implements View.OnClic
 
         ((TextView)holderView.findViewById(R.id.tvConfirm)).setText(getResources()
                 .getString(R.string.dialog_done_confirm, current.getRecipientName()));
+        (holderView.findViewById(R.id.toggle)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FlatToggleButton toggle = (FlatToggleButton) v;
+                if (((FlatToggleButton) v).isChecked()) {
+
+                }
+            }
+        });
 //
 //        Calendar calendar = Calendar.getInstance();
 //        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.CHINA);
@@ -268,7 +287,7 @@ public class PlanResultActivity extends AppCompatActivity implements View.OnClic
                     public void onClick(DialogPlus dialog, View view) {
                         switch (view.getId()) {
                             case R.id.footer_confirm_button:
-
+                                showProgress(true);
                                 GsonRequest gsonRequest = new GsonRequest.RequestBuilder()
 //                                        .post()
                                         .url(Constants.BASE_URL)
@@ -284,17 +303,18 @@ public class PlanResultActivity extends AppCompatActivity implements View.OnClic
                                                     readyOrders.remove(0);
                                                     refreshList();
                                                 }
+                                                showProgress(false);
                                             }
                                         })
                                         .errorListener(new Response.ErrorListener() {
                                             @Override
                                             public void onErrorResponse(VolleyError error) {
                                                 Toast.makeText(PlanResultActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
+                                                showProgress(false);
                                             }
                                         })
                                         .build();
                                 queue.add(gsonRequest);
-
                                 dialog.dismiss();
                                 break;
                             case R.id.footer_close_button:
@@ -477,7 +497,7 @@ public class PlanResultActivity extends AppCompatActivity implements View.OnClic
             // Show the Up button in the action bar.
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
-            getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_drawer);
+            getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp);
         }
     }
 
