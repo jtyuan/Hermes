@@ -498,10 +498,18 @@ public class MapActivity extends AppCompatActivity implements BaiduMap.OnMapClic
         if (bikingRouteResult != null && bikingRouteResult.error == SearchResult.ERRORNO.AMBIGUOUS_ROURE_ADDR) {
             // 起终点或途经点地址有岐义，通过以下接口获取建议查询信息
             SuggestAddrInfo suggest = bikingRouteResult.getSuggestAddrInfo();
-            PlanNode stNode = PlanNode.withLocation(suggest.getSuggestStartNode().get(0).location);
-            PlanNode enNode = PlanNode.withLocation(suggest.getSuggestEndNode().get(0).location);
-            mSearch.bikingSearch((new BikingRoutePlanOption())
-                    .from(stNode).to(enNode));
+
+            if (suggest.getSuggestStartNode() != null && suggest.getSuggestStartNode().size() > 0) {
+                PlanNode stNode = PlanNode.withLocation(suggest.getSuggestStartNode().get(0).location);
+                if (suggest.getSuggestEndNode() != null && suggest.getSuggestEndNode().size() > 0) {
+                    PlanNode enNode = PlanNode.withLocation(suggest.getSuggestEndNode().get(0).location);
+                    mSearch.bikingSearch((new BikingRoutePlanOption())
+                            .from(stNode).to(enNode));
+                    return;
+                }
+            }
+            Snackbar.make(container, "抱歉，未找到结果", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
             return;
         }
         if (bikingRouteResult != null && bikingRouteResult.error == SearchResult.ERRORNO.NO_ERROR) {

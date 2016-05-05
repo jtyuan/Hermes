@@ -4,6 +4,7 @@
     <string name="activity_plan_result">今日配送</string>
     <string name="activity_my_list">我的订单</string>
     <string name="activity_completed_order">配送历史</string>
+    <string name="menu_item_more">更多</string>
     <string name="btn_confirm">确定</string>
     <string name="btn_plan">开始规划</string>
     <string name="today_order">今日订单</string>

@@ -155,7 +155,7 @@ public class CompletedOrderActivity extends AppCompatActivity implements View.On
     @SuppressWarnings("unchecked")
     void init() {
 //        orders = new ArrayList<>();
-        initResideMenu();
+        setupResideMenu();
         setupActionBar();
 
         users = new ArrayList<>();
@@ -172,6 +172,7 @@ public class CompletedOrderActivity extends AppCompatActivity implements View.On
 
         refreshList();
     }
+
 
     private void refreshList() {
         showProgress(true);
@@ -228,7 +229,7 @@ public class CompletedOrderActivity extends AppCompatActivity implements View.On
 
     }
 
-    private void initResideMenu() {
+    private void setupResideMenu() {
         resideMenu = new ResideMenu(this);
         resideMenu.setBackground(R.drawable.menu_background);
         resideMenu.attachToActivity(this);
@@ -249,7 +250,7 @@ public class CompletedOrderActivity extends AppCompatActivity implements View.On
         loginInfo = getSharedPreferences("login", MODE_PRIVATE);
         isCourier = loginInfo.getBoolean("isCourier", false);
 
-        resideMenu.addMenuItem(itemHome, ResideMenu.DIRECTION_LEFT);
+//        resideMenu.addMenuItem(itemHome, ResideMenu.DIRECTION_LEFT);
 
         if (isCourier) {
             resideMenu.addMenuItem(itemToday, ResideMenu.DIRECTION_LEFT);
@@ -355,7 +356,7 @@ public class CompletedOrderActivity extends AppCompatActivity implements View.On
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
             int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-            cardView.setVisibility(show ? View.GONE : View.VISIBLE);
+//            cardView.setVisibility(show ? View.GONE : View.VISIBLE);
             cardView.animate().setDuration(shortAnimTime).alpha(
                     show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
                 @Override
@@ -364,7 +365,7 @@ public class CompletedOrderActivity extends AppCompatActivity implements View.On
                 }
             });
 
-            llHeaderProgress.setVisibility(show ? View.VISIBLE : View.GONE);
+//            llHeaderProgress.setVisibility(show ? View.VISIBLE : View.GONE);
             llHeaderProgress.animate().setDuration(shortAnimTime).alpha(
                     show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
                 @Override

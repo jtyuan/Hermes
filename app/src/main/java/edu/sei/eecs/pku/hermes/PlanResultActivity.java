@@ -3,14 +3,20 @@ package edu.sei.eecs.pku.hermes;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.app.Instrumentation;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Path;
+import android.graphics.Point;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.SystemClock;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.ActionMenuView;
 import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.Gravity;
@@ -24,6 +30,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -42,6 +49,10 @@ import com.orhanobut.dialogplus.OnClickListener;
 import com.orhanobut.dialogplus.ViewHolder;
 import com.special.ResideMenu.ResideMenu;
 import com.special.ResideMenu.ResideMenuItem;
+import com.yalantis.contextmenu.lib.ContextMenuDialogFragment;
+import com.yalantis.contextmenu.lib.MenuObject;
+import com.yalantis.contextmenu.lib.MenuParams;
+import com.yalantis.contextmenu.lib.interfaces.OnMenuItemClickListener;
 import com.yalantis.phoenix.PullToRefreshView;
 
 import org.androidannotations.annotations.AfterViews;
@@ -71,9 +82,16 @@ import edu.sei.eecs.pku.hermes.utils.network.HttpClientRequest;
 import edu.sei.eecs.pku.hermes.utils.network.OrderListGson;
 import edu.sei.eecs.pku.hermes.utils.network.ResultGson;
 
+
 @EActivity(R.layout.activity_plan_result)
-public class PlanResultActivity extends AppCompatActivity implements View.OnClickListener, Comparator<Order> {
+public class PlanResultActivity extends AppCompatActivity
+        implements View.OnClickListener, Comparator<Order>, OnMenuItemClickListener {
     public static boolean isForeground = false;
+
+    private static final int MENU_TOP = 1;
+    private static final int MENU_REFRESH = 2;
+    private static final int MENU_NAVI = 3;
+    private static final int MENU_DOWN = 4;
 
     private SharedPreferences scheduleInfo;
     private SharedPreferences loginInfo;
@@ -140,10 +158,17 @@ public class PlanResultActivity extends AppCompatActivity implements View.OnClic
     @ViewById(R.id.scrollView)
     ScrollView scrollView;
 
+    @ViewById(R.id.relativeLayout)
+    RelativeLayout relativeLayout;
+
     @ViewById(R.id.pull_to_refresh)
     PullToRefreshView pullToRefreshView;
 
+    @ViewById(R.id.card_view)
+    CardView cardView;
+
     ResideMenu resideMenu;
+    ContextMenuDialogFragment  mMenuDialogFragment;
 
     private boolean isCourier = false;
     private ResideMenuItem itemHome;
@@ -517,18 +542,124 @@ public class PlanResultActivity extends AppCompatActivity implements View.OnClic
         return true;
     }
 
+    private void setupActionBarMenu() {
+        MenuObject close = new MenuObject();
+        close.setResource(R.drawable.ic_close_white_24dp);
+
+        MenuObject refresh = new MenuObject("刷新");
+        refresh.setResource(R.drawable.ic_refresh_white_24dp);
+
+        MenuObject navi = new MenuObject("导航");
+        navi.setResource(R.drawable.ic_near_me_white_24dp);
+
+        MenuObject top = new MenuObject("到顶端");
+        top.setResource(R.drawable.ic_arrow_upward_white_24dp);
+
+        MenuObject down = new MenuObject("到底端");
+        down.setResource(R.drawable.ic_arrow_downward_white_24dp);
+
+        List<MenuObject> menuObjects = new ArrayList<>();
+        menuObjects.add(close);
+        menuObjects.add(top);
+        menuObjects.add(refresh);
+        menuObjects.add(navi);
+        menuObjects.add(down);
+
+        for (MenuObject mo : menuObjects) {
+            mo.setBgColor(R.color.colorPrimaryDark);
+        }
+
+        MenuParams menuParams = new MenuParams();
+        menuParams.setActionBarSize((int) getResources()
+                .getDimension(R.dimen.abc_action_bar_default_height_material));
+        menuParams.setMenuObjects(menuObjects);
+        menuParams.setClosableOutside(true);
+        // set other settings to meet your needs
+        mMenuDialogFragment = ContextMenuDialogFragment.newInstance(menuParams);
+        mMenuDialogFragment.setItemClickListener(this);
+    }
+
+    @Override
+    public void onMenuItemClick(View clickedView, int position) {
+        switch (position) {
+            case MENU_TOP:
+                scrollView.fullScroll(View.FOCUS_UP);
+                break;
+            case MENU_DOWN:
+                scrollView.fullScroll(View.FOCUS_DOWN);
+                break;
+            case MENU_NAVI:
+                Intent intent = new Intent(PlanResultActivity.this, MapActivity_.class);
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("current", current);
+                intent.putExtras(bundle);
+                startActivity(intent);
+                overridePendingTransition(R.anim.move_right_in_activity, R.anim.move_left_out_activity);
+                break;
+            case MENU_REFRESH:
+                pullToRefreshView.setRefreshing(true);
+                showProgress(true);
+                Toast.makeText(PlanResultActivity.this, "正在刷新...", Toast.LENGTH_SHORT).show();
+                GsonRequest gsonRequest = new GsonRequest.RequestBuilder()
+//                    .post()
+                        .url(Constants.BASE_URL)
+                        .addParams("courier", InitApplication.courier_id)
+                        .addParams("task", getDateString())
+                        .addParams("lazy", "") // lazy mode, fetch order list without rescheduling
+                        .clazz(OrderListGson.class)
+                        .successListener(new Response.Listener() {
+                            @Override
+                            public void onResponse(Object response) {
+                                showProgress(false);
+                                orders.clear();
+                                readyOrders.clear();
+                                uninformedOrders.clear();
+                                completedOrders.clear();
+                                failedOrders.clear();
+                                orders.addAll(Arrays.asList(((OrderListGson) response).getOrders()));
+                                Collections.sort(orders, PlanResultActivity.this);
+                                for (Order order : orders) {
+                                    switch (order.getState()) {
+                                        case Constants.STATUS_READY:
+                                            readyOrders.add(order);
+//                                        Toast.makeText(PlanResultActivity.this, order.getAddress(), Toast.LENGTH_SHORT).show();
+                                            break;
+                                        case Constants.STATUS_UNINFORMED:
+                                            uninformedOrders.add(order);
+                                            break;
+                                        case Constants.STATUS_COMPLETED:
+                                            completedOrders.add(order);
+                                            break;
+                                        case Constants.STATUS_FAILED:
+                                            failedOrders.add(order);
+                                            break;
+                                    }
+                                }
+
+                                refreshList();
+
+                                pullToRefreshView.setRefreshing(false);
+                                Toast.makeText(PlanResultActivity.this, "刷新完毕", Toast.LENGTH_SHORT).show();
+                            }
+                        })
+                        .errorListener(new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                Toast.makeText(PlanResultActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
+                            }
+                        })
+                        .build();
+                queue.add(gsonRequest);
+                break;
+        }
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.completed:
-                Intent intent = new Intent(PlanResultActivity.this, CompletedOrderActivity_.class);
-                Bundle bundle = new Bundle();
-                bundle.putSerializable("orders", completedOrders);
-//                CompletedOrderActivity_.intent(PlanResultActivity.this).completedOrders().start();
-                intent.putExtras(bundle);
-                startActivity(intent);
-                overridePendingTransition(R.anim.move_right_in_activity, R.anim.move_left_out_activity);
+                mMenuDialogFragment.show(getSupportFragmentManager(), "ContextMenuDialogFragment");
                 return true;
             case android.R.id.home:
                 resideMenu.openMenu(ResideMenu.DIRECTION_LEFT);
@@ -549,9 +680,10 @@ public class PlanResultActivity extends AppCompatActivity implements View.OnClic
 
 
         setupActionBar();
+        setupActionBarMenu();
         // Reside Menu Initialization
         // attach to current activity;
-        initResideMenu();
+        setupResideMenu();
         registerMessageReceiver();
 
         orders = new ArrayList<>();
@@ -566,9 +698,6 @@ public class PlanResultActivity extends AppCompatActivity implements View.OnClic
         // Get a Request Queue
         queue = HttpClientRequest.getInstance(this.getApplicationContext()).getRequestQueue();
 
-
-        CardView cardView = (CardView) findViewById(R.id.card_view);
-
         currentCard.add(tvCurrent);
         currentCard.add(tvAddress);
         currentCard.add(tvArriveTime);
@@ -576,7 +705,7 @@ public class PlanResultActivity extends AppCompatActivity implements View.OnClic
         currentCard.add(tvName);
         currentCard.add(tvOrderId);
 
-        if (waitingList != null && uninformedList != null && failedList != null) {
+        if (cardView != null && waitingList != null && uninformedList != null && failedList != null) {
 
             cardView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -653,7 +782,8 @@ public class PlanResultActivity extends AppCompatActivity implements View.OnClic
         }
     }
 
-    private void initResideMenu() {
+
+    private void setupResideMenu() {
         resideMenu = new ResideMenu(this);
         resideMenu.setBackground(R.drawable.menu_background);
         resideMenu.attachToActivity(this);
@@ -674,7 +804,7 @@ public class PlanResultActivity extends AppCompatActivity implements View.OnClic
         loginInfo = getSharedPreferences("login", MODE_PRIVATE);
         isCourier = loginInfo.getBoolean("isCourier", false);
 
-        resideMenu.addMenuItem(itemHome, ResideMenu.DIRECTION_LEFT);
+//        resideMenu.addMenuItem(itemHome, ResideMenu.DIRECTION_LEFT);
 
         if (isCourier) {
             resideMenu.addMenuItem(itemToday, ResideMenu.DIRECTION_LEFT);
@@ -1008,6 +1138,7 @@ public class PlanResultActivity extends AppCompatActivity implements View.OnClic
         return (lhs.getArriveTime() - rhs.getArriveTime() >= 0) ? 1 : -1;
     }
 
+
     public class MessageReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -1017,7 +1148,7 @@ public class PlanResultActivity extends AppCompatActivity implements View.OnClic
 
 
     public static String getDateString() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd", Locale.CHINA);
         return dateFormat.format(Calendar.getInstance().getTime());
     }
 
@@ -1055,7 +1186,6 @@ public class PlanResultActivity extends AppCompatActivity implements View.OnClic
             overridePendingTransition(R.anim.move_left_in_activity, R.anim.move_right_out_activity);
         }
     }
-
     /**
      * Shows the progress UI and hides the login form.
      */
@@ -1068,11 +1198,19 @@ public class PlanResultActivity extends AppCompatActivity implements View.OnClic
             int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
 //            scrollView.setVisibility(show ? View.GONE : View.VISIBLE);
-            scrollView.animate().setDuration(shortAnimTime).alpha(
+            relativeLayout.animate().setDuration(shortAnimTime).alpha(
                     show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    scrollView.setVisibility(show ? View.GONE : View.VISIBLE);
+                    relativeLayout.setVisibility(show ? View.GONE : View.VISIBLE);
+                }
+            });
+
+            cardView.animate().setDuration(shortAnimTime).alpha(
+                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    cardView.setVisibility(show ? View.GONE : View.VISIBLE);
                 }
             });
 
@@ -1084,11 +1222,15 @@ public class PlanResultActivity extends AppCompatActivity implements View.OnClic
                     llHeaderProgress.setVisibility(show ? View.VISIBLE : View.GONE);
                 }
             });
+
+            if (!show) {
+                scrollView.fullScroll(View.FOCUS_UP);
+            }
         } else {
             // The ViewPropertyAnimator APIs are not available, so simply show
             // and hide the relevant UI components.
             llHeaderProgress.setVisibility(show ? View.VISIBLE : View.GONE);
-            scrollView.setVisibility(show ? View.GONE : View.VISIBLE);
+            relativeLayout.setVisibility(show ? View.GONE : View.VISIBLE);
         }
     }
 
@@ -1097,4 +1239,5 @@ public class PlanResultActivity extends AppCompatActivity implements View.OnClic
     public void onBackPressed() {
         moveTaskToBack(true);
     }
+
 }

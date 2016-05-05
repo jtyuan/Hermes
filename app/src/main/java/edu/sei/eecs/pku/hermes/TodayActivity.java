@@ -181,7 +181,16 @@ public class TodayActivity extends AppCompatActivity implements View.OnClickList
         if (isCourier) {
 //            this.startService(new Intent(this, LocationService.class));
             LocationService_.intent(getApplication()).start();
+            PlanResultActivity_.intent(TodayActivity.this).start();
+            finish();
+            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+        } else {
+            UserListActivity_.intent(TodayActivity.this).start();
+            finish();
+            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
         }
+
+        // TODO no idea what to put in this activity.. maybe nothing
     }
 
     @AfterViews
@@ -194,11 +203,11 @@ public class TodayActivity extends AppCompatActivity implements View.OnClickList
         // Get a Request Queue
         queue = HttpClientRequest.getInstance(this.getApplicationContext()).getRequestQueue();
 
-        initResideMenu();
+        setupResideMenu();
 
     }
 
-    private void initResideMenu() {
+    private void setupResideMenu() {
         resideMenu = new ResideMenu(this);
         resideMenu.setBackground(R.drawable.menu_background);
         resideMenu.attachToActivity(this);

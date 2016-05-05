@@ -50,7 +50,7 @@
                 android:layout_gravity="center"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@android:color/white"
+                card_view:cardBackgroundColor="@color/cardBackground"
                 card_view:cardCornerRadius="4dp"
                 android:visibility="gone">
 
@@ -67,6 +67,7 @@
                     <ListView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:background="@android:color/white"
                         android:id="@+id/completedList"
                         android:layout_centerHorizontal="true" />
                 </RelativeLayout>

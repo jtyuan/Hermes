@@ -324,7 +324,7 @@ public class UserListActivity extends AppCompatActivity implements View.OnClickL
 
         // Reside Menu Initialization
         // attach to current activity;
-        initResideMenu();
+        setupResideMenu();
         registerMessageReceiver();
 
         orders = new ArrayList<>();
@@ -345,7 +345,7 @@ public class UserListActivity extends AppCompatActivity implements View.OnClickL
 
     }
 
-    private void initResideMenu() {
+    private void setupResideMenu() {
         resideMenu = new ResideMenu(this);
         resideMenu.setBackground(R.drawable.menu_background);
         resideMenu.attachToActivity(this);
@@ -363,7 +363,7 @@ public class UserListActivity extends AppCompatActivity implements View.OnClickL
         itemLogout.setOnClickListener(this);
         itemMyList.setOnClickListener(this);
 
-        resideMenu.addMenuItem(itemHome, ResideMenu.DIRECTION_LEFT);
+//        resideMenu.addMenuItem(itemHome, ResideMenu.DIRECTION_LEFT);
 
         if (isCourier) {
             resideMenu.addMenuItem(itemToday, ResideMenu.DIRECTION_LEFT);
